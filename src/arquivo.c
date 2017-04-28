@@ -1,49 +1,55 @@
 #include "arquivo.h"
 
-
-void verificacao_parametros(int argc, char* argv[]){
-	if(argc!=4){
-		printf("Erro: numero de argumentos na chamada do programa invalido!\nObteve-se %d argumentos.\n", argc-1);
-		exit(0);
-	}
-	if(tipo_operacao(argv[1])== ERRO){
-		printf("Erro: operacao nao reconhecida.\n");
-		exit(0);
-	}
-	char *validade_entrada = ".asm";
-	char *validade_saida = ".";
-
-	//Funcao strstr() checa se subselecao esta
-	//dentro de uma string de interesse
-	if((strstr(argv[2], validade_entrada))==NULL){
-		printf("Erro: Arquivo especificado nao contem extensao '.asm'\n");
-		exit(0);
-	}
-	//Verifica se arquivo de saida n tem extensao
-	if((strstr(argv[3], validade_saida))!=NULL){
-		printf("Erro: Arquivo de saida possui ja extensao\n");
-		exit(0);
-	}
-
-    FILE* fp = fopen(argv[2], "r");
-
-    if(fp == NULL){
-        printf("Erro na abertura do arquivo!\n");
-        exit(0);
-	}
-
-	return;
-}
-
-
-enum operacoes tipo_operacao(char* string){
+/*
+ *  tipo_operacao()
+ *
+ *  Funcao que retorna o tipo de operacao de acordo com o segundo argumento de entrada
+ * do programa de traducao
+ */
+Operacoes_t tipo_operacao(char* string){
+	// Funcao strcmp() retorna 0 se strings forem iguais
+	//// -p para pre processamento
 	if (!(strcmp(string, "-p"))){
 		return PRE_PROC;
 	}
+	//// -o para montagem
 	else if (!(strcmp(string, "-o"))){
 		return MONTAGEM;
 	}
 	else{
 		return ERRO;
 	}
+}
+
+/*
+ *  validacao_argumentos()
+ *
+ *  Funcao responsavel pela checagem do numero de argumentos de entrada
+ * do programa de traducao
+ */
+Operacoes_t validacao_argumentos(int argc, char* argv[]){
+	// Variavel para retorno
+	Operacoes_t operacao;
+
+	//// Se o numero de argumentos eh invalido, ERROR -1
+	if(argc!=4){
+		printf("Erro: numero de argumentos na chamada do programa eh invalido!\nObteve-se %d argumentos.\n", argc-1);
+		exit(-1);
+	}
+	//// Se o tipo de operacao eh diferente de -p ou -o, ERROR -2
+	if(tipo_operacao(argv[1])==ERRO){
+		printf("Erro: operacao nao reconhecida!\n");
+		exit(-2);
+	}
+	//// Se o arquivo de saida tem extensao, ERROR -3
+	// Variavel que checa a extensao do arquivo de saida
+	char *validade_saida = ".";
+	// Funcao strstr() checa se subselecao esta dentro de uma string de interesse
+	if((strstr(argv[3], validade_saida))!=NULL){
+		printf("Erro: Arquivo de saida ja possui extensao!\n");
+		exit(-3);
+	}
+
+	// Retorna a operacao a ser realizada
+	return operacao;
 }
