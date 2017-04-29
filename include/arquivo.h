@@ -5,20 +5,24 @@
 #include <stdlib.h>
 #include <string.h>
 
-enum operacoes {
+typedef enum {
 	PRE_PROC, MONTAGEM, ERRO
-};
+} Operacoes_t;
 
 /*
-* O  programa  de  traducao deve receber tres  argumentos  em  linha  de  comando
-* (nessa ordem): um tipo de operacao, um arquivo de entrada contendo um programa em
-* Assembly em formato texto (verificar que extensao seja “.asm”) na 
-* linguagem hipotetica e um arquivo de saida (SO O NOME DO ARQUIVO DE SAIDA SEM EXTENSAO).
+*  O programa de traducao deve receber tres argumentos em linha de comando
+* (nessa ordem):
+*	  - Um tipo de operacao (-p ou -o);
+*	  - Um arquivo de entrada contendo um programa em Assembly em formato texto
+* (verificar que extensao seja “.asm” ou ".pre") na linguagem hipotetica;
+*   - E um arquivo de saida sem extensao.
+*
+* EX: macroasssembler -p teste.asm teste
 */
 
-//Validacao dos argumentos passados com a chamada de programa
-void verificacao_parametros(int argc, char* argv[]); 
-//Retorna tipo de operacao especificado na chamada do programa	
-enum operacoes tipo_operacao(char* string);	
+// Retorna tipo de operacao especificado na chamada do programa
+Operacoes_t tipo_operacao(char* string);
+// Validacao dos argumentos passados com a chamada de programa
+Operacoes_t validacao_argumentos(int argc, char* argv[]);
 
-#endif 
+#endif
