@@ -50,6 +50,7 @@ Operacoes_t validacao_argumentos(int argc, char* argv[]){
 		exit(-3);
 	}
 
+	operacao = tipo_operacao(argv[1]);
 	// Retorna a operacao a ser realizada
 	return operacao;
 }

@@ -46,20 +46,16 @@ void seleciona_operacao(Operacoes_t operacao, char* argv[]){
 	}
 }
 
-struct{
-  
-}
-
 /*
  *  pre_processamento()
  *
- *  Funcao responsavel pela pre pre_processamento de um arquivo .asm de entrada
+ *  Funcao responsavel pelo pre processamento de um arquivo .asm de entrada
  * avaliando as diretivas:
  *   - EQU, 1 operando, sempre no inicio, cria um sinonimo textual para um simbolo;
  *   - IF, 1 operando, inclui a linha seguinte somente se o operando == 1.
  */
 FILE* pre_processamento(FILE *entrada){
-  //while !EOF{
+  // while !EOF{
   // verificar se o inicio da linha eh um label e se a proxima palavra eh um EQU
   //  se for EQU, associar o label ao operando
   // verificar se o inicio da linha eh um IF
@@ -67,9 +63,9 @@ FILE* pre_processamento(FILE *entrada){
   //   deixar a proxima linha
   //  se o valor do operando eh 0
   //   desconsiderar a proxima linha
-  //}
-  //rewind arquivo .asm
-  //retornar novo arquivo .pre
+  // }
+  // rewind arquivo .asm
+  // retornar novo arquivo .pre
 
   char linha[TLINHA];
   char *instrucao;
@@ -122,4 +118,25 @@ FILE* pre_processamento(FILE *entrada){
     } // if strcmp(token,"IF")
 
   } // while (!feof)
+}
+
+/* passagem1()
+ *
+ * Funcao responsavel pela 1 passagem do montador, recebendo um arquivo .pre ou .o
+ *
+ * Passagem 1 : informacoes de definicoes de rotulos, simbolos, etc
+ * Armazena os dados na Tabela de Simbolos e Tabela de definicoes (subconjunto da TS)
+
+ * Estruturas de dados a ser usadas:
+ * 		- Contador de linhas : indica qual linha do arquivo esta (envio de erros)
+ *		- Contador de posicao: endereco de memoria a ser colocado simbolo
+ *		- Tabela de simbolos : rotulos e simbolos declarados no programa
+ *		- Tabela de diretivas: instrucoes e diretivas reconhecidas pelo montador
+*/
+FILE* passagem1(FILE *pre_processado){
+	if(pre_processado == NULL){
+		//printf("")
+	}
+	int contador_posicao = 0;
+	int contador_linha = 1;
 }
