@@ -105,15 +105,23 @@ FILE* pre_processamento(FILE *entrada, char *nome_arquivo_pre){
     // Funcao fgets() lê até TLINHA caracteres ou até o '\n'
     instrucao = fgets(linha, TLINHA, entrada);
 
+		// fgets() retorna NULL, fim do pre processamento
+		if(instrucao == NULL)
+			break;
+
     // Se a linha nao eh nula
     if(instrucao[0] != '\n' && instrucao[1] != '\0'){
 
 			// Retirando os comentarios
 			instrucao = strtok(instrucao, ";");
 
+			char c = instrucao[strlen(instrucao)-1];
+			printf("%c %d\n", c, c);
+
 			// Formatando o arquivo .pre de acordo com a tabela ASCII
-			if(instrucao[strlen(instrucao)-1] == 10 || instrucao[strlen(instrucao)-1] == 9){
-				instrucao[strlen(instrucao)-1] = '\n';
+			if(instrucao[strlen(instrucao)-1] <= 30
+			|| instrucao[strlen(instrucao)-1] >= 122){
+				 instrucao[strlen(instrucao)-1] = '\n';
 			}
 
 			// Armazena a linha para escrita futura
@@ -225,7 +233,7 @@ FILE* pre_processamento(FILE *entrada, char *nome_arquivo_pre){
 	// Libera a memoria alocada para a lista de EQUS
 	libera_equ(lista_equs);
 
-	printf("\n\nArqurivo pre-processado gerado!\n");
+	printf("\n\n Arquivo pre-processado gerado!\n");
 }
 
 /* passagem1()
