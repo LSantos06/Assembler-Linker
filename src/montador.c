@@ -86,7 +86,7 @@ FILE* pre_processamento(FILE *entrada, char *nome_arquivo_pre){
 
 	// Elaborando o nome do arquivo .pre
 	arquivo_saida = strcat(nome_arquivo_pre, ".pre");
-	printf("%s\n", arquivo_saida);
+	//printf("%s\n", arquivo_saida);
 
 	// Abertura do arquivo para escrita
   pre = fopen(arquivo_saida, "w");
@@ -107,6 +107,15 @@ FILE* pre_processamento(FILE *entrada, char *nome_arquivo_pre){
 
     // Se a linha nao eh nula
     if(instrucao[0] != '\n' && instrucao[1] != '\0'){
+
+			// Retirando os comentarios
+			instrucao = strtok(instrucao, ";");
+
+			// Formatando o arquivo .pre de acordo com a tabela ASCII
+			if(instrucao[strlen(instrucao)-1] == 10 || instrucao[strlen(instrucao)-1] == 9){
+				instrucao[strlen(instrucao)-1] = '\n';
+			}
+
 			// Armazena a linha para escrita futura
 			strcpy(escrita, instrucao);
 
@@ -145,7 +154,6 @@ FILE* pre_processamento(FILE *entrada, char *nome_arquivo_pre){
 						escreve = 0;
             //printf("nao escreve prox\n");
           }
-
         } // 2 token
       } // if
 
@@ -216,6 +224,8 @@ FILE* pre_processamento(FILE *entrada, char *nome_arquivo_pre){
 
 	// Libera a memoria alocada para a lista de EQUS
 	libera_equ(lista_equs);
+
+	printf("\n\nArqurivo pre-processado gerado!\n");
 }
 
 /* passagem1()

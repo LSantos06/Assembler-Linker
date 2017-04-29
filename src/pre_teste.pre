@@ -1,4 +1,4 @@
 SECTION TEXT
-LOAD N 		;faz esta operaçao se L1 for verdadeiro
+LOAD N 	
 SECTION DATA
 N: SPACE
