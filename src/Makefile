@@ -9,13 +9,13 @@ IDIR = ../include
 LIBS= -lm
 
 
-_DEPS =	arquivo.h montador.h
+_DEPS =	arquivo.h montador.h tabelas.h
 
 DEPS =	$(patsubst %,$(IDIR)/%,$(_DEPS))
 
 
 
-_OBJ = arquivo.o montador.o main.o
+_OBJ = arquivo.o montador.o tabelas.o main.o
 
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
