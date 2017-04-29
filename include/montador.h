@@ -4,13 +4,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "arquivo.h"
+#include "tabelas.h"
 
 /*
 * Montador a ser implementado sera de 2 passagens
 */
 
 // Seleciona a operacao de acordo com o argumento
-void seleciona_operacao(Operacoes_t, char* argv[]);
+void seleciona_operacao(int argc, char* argv[]);
 // Realiza o pre processamento sobre um arquivo .asm (-p), gerando um arquivo .pre
 FILE* pre_processamento(FILE *entrada);
 // Realiza a montagem sobre um arquivo .asm ou .pre (-o)

@@ -9,7 +9,11 @@
  *  Funcao responsavel pela execucao de uma operacao de acordo
  * com o segundo argumento
  */
-void seleciona_operacao(Operacoes_t operacao, char* argv[]){
+void seleciona_operacao(int argc, char* argv[]){
+	Operacoes_t operacao;
+
+	operacao = validacao_argumentos(argc, argv);
+
 	// Variaveis que checam as extensoes
 	char *validade_entrada_pre = ".pre";
 	char *validade_entrada_asm = ".asm";
@@ -30,7 +34,7 @@ void seleciona_operacao(Operacoes_t operacao, char* argv[]){
 			exit(-5);
 		}
     // Pre processamento
-    pre_processamento(fp);
+    //pre_processamento(fp);
 	}
 
 	// Se a operacao eh montagem -o

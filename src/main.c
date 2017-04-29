@@ -5,10 +5,9 @@ int main(int argc, char* argv[]){
 
 	Operacoes_t operacao;
 
-	// Validacao dos argumentos e decisao da operacao
-	operacao = validacao_argumentos(argc, argv);
+	// Validacao dos argumentos e decisao da operacao e
 	// Executa a operacao de acordo com o segundo argumento
-	seleciona_operacao(operacao, argv);
+	seleciona_operacao(argc, argv);
 
 	return 0;
 }
