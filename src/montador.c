@@ -9,6 +9,7 @@
  *  Funcao responsavel pela execucao de uma operacao de acordo
  * com o segundo argumento
  */
+
 void seleciona_operacao(int argc, char* argv[]){
 	Operacoes_t operacao;
 
@@ -34,7 +35,7 @@ void seleciona_operacao(int argc, char* argv[]){
 			exit(-5);
 		}
     // Pre processamento
-    //pre_processamento(fp);
+    pre_processamento(fp);
 	}
 
 	// Se a operacao eh montagem -o
@@ -50,20 +51,23 @@ void seleciona_operacao(int argc, char* argv[]){
 	}
 }
 
-// struct{
+struct{
   
-// };
-
+}
 /*
  *  pre_processamento()
  *
+<<<<<<< HEAD
  *  Funcao responsavel pela pre_processamento de um arquivo .asm de entrada
+=======
+ *  Funcao responsavel pela pre pre_processamento de um arquivo .asm de entrada
+>>>>>>> origin/lucas
  * avaliando as diretivas:
  *   - EQU, 1 operando, sempre no inicio, cria um sinonimo textual para um simbolo;
  *   - IF, 1 operando, inclui a linha seguinte somente se o operando == 1.
  */
 FILE* pre_processamento(FILE *entrada){
-  // while !EOF{
+  //while !EOF{
   // verificar se o inicio da linha eh um label e se a proxima palavra eh um EQU
   //  se for EQU, associar o label ao operando
   // verificar se o inicio da linha eh um IF
@@ -71,9 +75,9 @@ FILE* pre_processamento(FILE *entrada){
   //   deixar a proxima linha
   //  se o valor do operando eh 0
   //   desconsiderar a proxima linha
-  // }
-  // rewind arquivo .asm
-  // retornar novo arquivo .pre
+  //}
+  //rewind arquivo .asm
+  //retornar novo arquivo .pre
 
   char linha[TLINHA];
   char *instrucao;
@@ -128,6 +132,8 @@ FILE* pre_processamento(FILE *entrada){
   } // while (!feof)
 }
 
+<<<<<<< HEAD
+
 /* passagem1()
  * 
  * Funcao responsavel pela 1 passagem do montador, recebendo um arquivo .pre ou .o
@@ -148,3 +154,4 @@ FILE* passagem1(FILE *pre_processado){
 	int contador_posicao = 0;
 	int contador_linha = 1;
 }
+=======

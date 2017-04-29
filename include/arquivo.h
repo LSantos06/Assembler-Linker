@@ -5,7 +5,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-typedef enum operacoes {
+
+typedef enum {
 	PRE_PROC, MONTAGEM, ERRO
 } Operacoes_t;
 
@@ -25,4 +26,5 @@ Operacoes_t tipo_operacao(char* string);
 // Validacao dos argumentos passados com a chamada de programa
 Operacoes_t validacao_argumentos(int argc, char* argv[]);	
 
-#endif 
+
+#endif
