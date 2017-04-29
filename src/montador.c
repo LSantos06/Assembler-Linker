@@ -1,4 +1,5 @@
 #include "montador.h"
+#include "listas.c"
 
 // Definicao do tamanho maximo de uma linha
 #define TLINHA 100
@@ -30,7 +31,7 @@ void seleciona_operacao(Operacoes_t operacao, char* argv[]){
 			exit(-5);
 		}
     // Pre processamento
-    pre_processamento(fp);
+    pre_processamento(fp, argv[3]);
 	}
 
 	// Se a operacao eh montagem -o
@@ -54,7 +55,7 @@ void seleciona_operacao(Operacoes_t operacao, char* argv[]){
  *   - EQU, 1 operando, sempre no inicio, cria um sinonimo textual para um simbolo;
  *   - IF, 1 operando, inclui a linha seguinte somente se o operando == 1.
  */
-FILE* pre_processamento(FILE *entrada){
+FILE* pre_processamento(FILE *entrada, char *nome_arquivo_pre){
   // while !EOF{
   // verificar se o inicio da linha eh um label e se a proxima palavra eh um EQU
   //  se for EQU, associar o label ao operando
@@ -67,57 +68,154 @@ FILE* pre_processamento(FILE *entrada){
   // rewind arquivo .asm
   // retornar novo arquivo .pre
 
+  // Variaveis para verificacao das linhas
   char linha[TLINHA];
+	char escrita[TLINHA];
   char *instrucao;
   char *token;
-  //bool escreve_prox;
+
+  // Variaveis para armazenar os EQUs
+  struct Equ_t *lista_equs = (struct Equ_t *) malloc(sizeof(struct Equ_t));
+  inicializa_equ(lista_equs);
+  char *label;
+  struct Equ_t *resultado_busca;
+
+	// Variaveis para criacao do arquivo pre processado
+	FILE *pre;
+	char *arquivo_saida;
+
+	// Elaborando o nome do arquivo .pre
+	arquivo_saida = strcat(nome_arquivo_pre, ".pre");
+	printf("%s\n", arquivo_saida);
+
+	// Abertura do arquivo para escrita
+  pre = fopen(arquivo_saida, "w");
+	// Se o arquivo nao conseguiu ser aberto, ERROR -4
+  if(pre == NULL){
+    printf("Erro na abertura do arquivo!\n");
+    exit(-4);
+ 	}
+
+  // Variaveis para escrita das linhas
+	int linha_anterior_if = 0;
+	int linha_atual_if = 0;
+	int escreve = 0;
 
   while(!feof(entrada)){
     // Funcao fgets() lê até TLINHA caracteres ou até o '\n'
     instrucao = fgets(linha, TLINHA, entrada);
 
-    // 1 token, que pode ser um "IF" ou qualquer outra coisa
-    // Funcao strtok() corta uma string em tokens a partir de um separador
-    token = strtok(instrucao, " ");
+    // Se a linha nao eh nula
+    if(instrucao[0] != '\n' && instrucao[1] != '\0'){
+			// Armazena a linha para escrita futura
+			strcpy(escrita, instrucao);
 
-    // Se o 1 token eh "IF"
-    if(!strcmp(token,"IF")){
-      // Pega o 2 token para decidir se a linha continua ou eh desconsiderada
-      if(token!=NULL){
-        token = strtok(NULL, " ");
+      // 1 token, que pode ser um "IF" ou qualquer outra coisa
+      // Funcao strtok() corta uma string em tokens a partir de um separador
+      token = strtok(instrucao, " ");
 
-        // IF 1, proxima linha eh escrita
-        if(!strcmp(token,"1")){
-          //escreve_prox;
-        }
-        // IF 0, proxima linha nao eh escrita
-        else{
-          //!escreve_prox;
-        } // if strcmp(token,"1")
-      } // if (token!=NULL)
-    }
-    // Se o 1 token nao eh "IF"
-    else{
-      // Pega o 2 token para ver se eh um EQU
-      if(token!=NULL){
-        token = strtok(NULL, " ");
+      //// Se o 1 token eh "IF"
+      if(!strcmp(token,"IF")){
+        //printf("IF\n");
 
-        // LABEL: EQU
-        if(!strcmp(token,"EQU")){
-          // Pega o 3 token, que eh o operando de EQU
-          if(token!=NULL){
-            token = strtok(NULL, " ");
+				// Variavel para avaliacao da escrita da linha apos o IF
+				linha_anterior_if = linha_atual_if;
+				linha_atual_if = 1;
 
-          } // if (token!=NULL)
-        }
-        // Linha eh escrita
-        else{
-          //escreve_atual
-        } // if strcmp(token,"EQU")
-      } // if (token!=NULL)
-    } // if strcmp(token,"IF")
+        // Pega o 2 token para decidir se a linha continua ou eh desconsiderada
+        if(token!=NULL){
+          token = strtok(NULL, " ");
+          //printf("IF %s\n", token);
+
+					//exibe(lista_equs);
+
+          // Busca o rotulo na lista de equs
+          resultado_busca = busca_equ(lista_equs, token);
+
+					//printf("%s\n", resultado_busca->id);
+					//printf("%s\n", resultado_busca->valor);
+
+          // IF 1, proxima linha eh escrita
+          if(!strcmp(resultado_busca->valor, "1\n")){
+            printf("escreve prox\n");
+						escreve = 1;
+          }
+          // IF 0, proxima linha nao eh escrita
+          else{
+						escreve = 0;
+            //printf("nao escreve prox\n");
+          }
+
+        } // 2 token
+      } // if
+
+      //// Senao eh "IF"
+      else{
+        //printf("OUTRO\n");
+
+				// Variavel para avaliacao da escrita da linha apos o IF
+				linha_anterior_if = linha_atual_if;
+				linha_atual_if = 0;
+
+        // Armazena o label para guardar na lista de Equs
+        label = token;
+				// Retira o : do label para insercao na lista
+				label[strlen(label)-1] = '\n';
+
+        // Pega o 2 token para ver se eh um EQU
+        if(token!=NULL){
+          token = strtok(NULL, " ");
+          //printf("OUTRO %s\n", token);
+
+          // LABEL: EQU, linha nao eh escrita no .pre
+          if(!strcmp(token,"EQU")){
+						printf("nao escreve atual\n");
+
+            // Pega o 3 token, que eh o operando de EQU
+            if(token!=NULL){
+              token = strtok(NULL, " ");
+              //printf("EQU %s\n", token);
+
+              // Insere na lista de equs
+							insere_equ(lista_equs, label, token);
+            } // 3 token
+          }
+          // Linha eh escrita no .pre
+          else{
+            printf("escreve atual (depende se tem IF antes)\n");
+
+						//printf("%d, %d\n", linha_anterior_if, linha_atual_if);
+
+						// Depende do IF para saber se a linha sera escrita
+						if(linha_anterior_if == 1){
+
+							// So escreve quando a avaliacao do if for 1
+							if(escreve == 1){
+								fputs(escrita, pre);
+							}
+						}
+						// Linha que nao possui diretivas e independe do IF
+						else{
+							fputs(escrita, pre);
+						}
+          }
+        } // 2 token
+      } // else
+
+    } // instrucao != NULL
 
   } // while (!feof)
+
+	// Fecha o arquivo .pre
+	fclose(pre);
+
+	// Rebobina o arquivo de entrada
+	rewind(entrada);
+
+	//exibe_equ(lista_equs);
+
+	// Libera a memoria alocada para a lista de EQUS
+	libera_equ(lista_equs);
 }
 
 /* passagem1()
