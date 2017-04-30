@@ -37,7 +37,6 @@ void seleciona_operacao(int argc, char* argv[]){
 			exit(-5);
 		}
     // Pre processamento
-
     pre_processamento(fp, argv[3]);
 	}
 
@@ -56,7 +55,7 @@ void seleciona_operacao(int argc, char* argv[]){
 
 /* scanner()
  * Verifica erros lexicos no programa
- * 		- contador_linha : para impressao de erro 
+ * 		- contador_linha : para impressao de erro
 */
 void scanner(char *linha, int contador_linha){
 	if(linha == NULL){
@@ -94,16 +93,8 @@ void scanner(char *linha, int contador_linha){
 
 	// if(erro == 1){
 	// 	exit(-6);
-	// }	
+	// }
 }
-
-// struct{
-  
-// };
-/*
- *  pre_processamento()
- *
- *  Funcao responsavel pela pre pre_processamento de um arquivo .asm de entrada
 
 /*
  *  pre_processamento()
@@ -116,7 +107,6 @@ void scanner(char *linha, int contador_linha){
 
 FILE* pre_processamento(FILE *entrada, char *nome_arquivo_pre){
   // while !EOF{
->>>>>>> master
   // verificar se o inicio da linha eh um label e se a proxima palavra eh um EQU
   //  se for EQU, associar o label ao operando
   // verificar se o inicio da linha eh um IF
@@ -124,10 +114,12 @@ FILE* pre_processamento(FILE *entrada, char *nome_arquivo_pre){
   //   deixar a proxima linha
   //  se o valor do operando eh 0
   //   desconsiderar a proxima linha
-
   // }
   // rewind arquivo .asm
   // retornar novo arquivo .pre
+
+	printf("\n\nPre Processamento: \n");
+
   // Variaveis para verificacao das linhas
   char linha[TLINHA];
   char escrita[TLINHA];
@@ -175,8 +167,8 @@ FILE* pre_processamento(FILE *entrada, char *nome_arquivo_pre){
 			// Retirando os comentarios
 			instrucao = strtok(instrucao, ";");
 
-			char c = instrucao[strlen(instrucao)-1];
-			printf("%c %d\n", c, c);
+			//char c = instrucao[strlen(instrucao)-1];
+			//printf("%c %d\n", c, c);
 
 			// Formatando o arquivo .pre de acordo com a tabela ASCII
 			if(instrucao[strlen(instrucao)-1] <= 30
@@ -214,11 +206,12 @@ FILE* pre_processamento(FILE *entrada, char *nome_arquivo_pre){
 
           // IF 1, proxima linha eh escrita
           if(!strcmp(resultado_busca->valor, "1\n")){
-            printf("escreve prox\n");
+            printf("IF: escreve prox\n");
 						escreve = 1;
           }
           // IF 0, proxima linha nao eh escrita
           else{
+						printf("IF: nao escreve prox\n");
 						escreve = 0;
             //printf("nao escreve prox\n");
           }
@@ -293,7 +286,7 @@ FILE* pre_processamento(FILE *entrada, char *nome_arquivo_pre){
 	// Libera a memoria alocada para a lista de EQUS
 	libera_equ(lista_equs);
 
-	printf("\n\n Arquivo pre-processado gerado!\n");
+	printf("Arquivo pre-processado gerado!\n");
 }
 
 /* passagem1()
@@ -318,7 +311,7 @@ FILE* passagem1(FILE *pre_processado){
 
 	//Cria as tabelas de simbolos e de definicoes vazias
 	inicializa_tabelas();
-	
+
 	char linha[TLINHA];
 	char *instrucao;
 
@@ -330,4 +323,3 @@ FILE* passagem1(FILE *pre_processado){
 
   } // while (!feof)
 }
-

@@ -23,11 +23,7 @@ typedef enum {
 // Retorna tipo de operacao especificado na chamada do programa
 Operacoes_t tipo_operacao(char* string);
 // Validacao dos argumentos passados com a chamada de programa
-<<<<<<< HEAD
-Operacoes_t validacao_argumentos(int argc, char* argv[]);	
-
-=======
 Operacoes_t validacao_argumentos(int argc, char* argv[]);
->>>>>>> master
+
 
 #endif

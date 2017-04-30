@@ -35,3 +35,15 @@ preproc:
 
 valpreproc:
 	valgrind ./prog -p pre_teste.asm pre_teste
+
+monta_asm:
+	./prog -p pre_teste.asm pre_teste
+
+valmonta_asm:
+	valgrind ./prog -p pre_teste.asm pre_teste
+
+monta_pre:
+	./prog -p pre_teste.pre pre_teste
+
+valmonta_pre:
+	valgrind ./prog -p pre_teste.pre pre_teste
