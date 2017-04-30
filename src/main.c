@@ -1,6 +1,6 @@
-#include "arquivo.h"
 #include "montador.h"
 #include "tabelas.h"
+#include "arquivo.h"
 
 #define MAIN_TESTES
 
