@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "arquivo.h"
 #include "tabelas.h"
 
@@ -13,6 +14,8 @@
 
 // Seleciona a operacao de acordo com o argumento
 void seleciona_operacao(int argc, char* argv[]);
+//Funcao que separara os elementos da linha
+void scanner(char *linha, int contador_linha);
 
 // Realiza o pre processamento sobre um arquivo .asm (-p), gerando um arquivo .pre
 FILE* pre_processamento(FILE *entrada);
