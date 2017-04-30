@@ -5,15 +5,15 @@ const opTab tabela_instrucoes[14] = {
 	{"MULT", 1, 3}, {"DIV", 1, 4},
 	{"JMP", 1, 5}, {"JMPN", 1, 6},
 	{"JMPP", 1, 7}, {"JMPZ", 1, 8},
-	{"COPY", 1, 9}, {"LOAD", 1, 10},
+	{"COPY", 2, 9}, {"LOAD", 1, 10},
 	{"STORE", 1, 11}, {"INPUT", 1, 12},
-	{"OUTPUT", 1, 13}, {"STOP", 1, 14}
+	{"OUTPUT", 1, 13}, {"STOP", 0, 14}
 };
 
 const dirTab tabela_diretivas[7] = {
 	//-1 Indica q numero de operandos e tamanho
 	// eh variavel
-	{"SECTION", 1, 0}, {"SPACE", -1, -1},
+	{"SECTION", 1, 0}, {"SPACE", 0, 0},
 	{"CONST", 1, 1}, {"PUBLIC", 0, 0},
 	{"EXTERN", 0, 0}, {"BEGIN", 0, 0},
 	{"END", 0, 0}
@@ -55,6 +55,42 @@ int tamanho_instrucao(char *operacao){
 
 	return retorno;
 }
+
+int tamanho_diretiva(char *diretiva, char* operando){
+	int i, achou = 0, retorno = 0;
+	int op_space = 0;
+
+	//Se for space
+	if(strstr(diretiva, "SPACE")){
+		//Se n for "\0", possui operando
+		if(strcmp(operando, "\0")){
+			op_space = atoi(operando);
+			if(op_space<=0){
+				printf("\nErro! Operando para diretiva SPACE invalido: numero menor ou igual a 0!\n");
+				return -1;
+			}
+			return op_space;
+		}
+	}
+
+	//Se n for space
+	for (i = 0; i<7; i++){
+		//Se achou a instrucao
+		if(!(strcmp(diretiva, tabela_diretivas[i].nome))){
+			achou = 1;
+			retorno = tabela_diretivas[i].tamanho;
+		} // if
+	} // for
+
+
+	//Se nao achou instrucao
+	if(achou == 0){
+		return -1;
+	}
+
+	return retorno;
+}
+
 
 //Cria uma tabela vazia
 void inicializa_tabelas(){
@@ -106,6 +142,9 @@ int busca_posicao_memoria(addrTab* tabela, char* nome){
 }
 
 int esta_vazia(addrTab* tabela){
+	if(tabela == NULL){
+		return 0;
+	}
 	if(tabela->prox == NULL){
 		return 1;
 	}
@@ -113,9 +152,9 @@ int esta_vazia(addrTab* tabela){
 	return 0;
 }
 
-int insere_tabela(addrTab *tabela, char *nome, int posicao){
+void insere_tabela(addrTab *tabela, char *nome, int posicao){
 	if(pertence_tabela(tabela, nome)){
-		return 0;
+		return;
 	}
 
 	addrTab *novo = (addrTab *) malloc(sizeof(addrTab));
@@ -126,19 +165,22 @@ int insere_tabela(addrTab *tabela, char *nome, int posicao){
 
 	tabela->prox = novo;
 
-	return 1;
+	return;
 }
 
 
 void imprime_tabela(addrTab *tabela){
-	printf("\n");
+	if(tabela==NULL){
+		return;
+	}
 
 	if (esta_vazia(tabela)){
 		printf("Tabela esta vazia\n\n");
 		return;
 	}
-	addrTab *aux = tabela->prox;
 
+
+	addrTab *aux = tabela->prox;
 	while(aux!=NULL){
 		printf("Simbolo = %s, Posicao = %d\n", aux->simbolo, aux->posicao_memoria);
 
