@@ -2,9 +2,9 @@
 #include "tabelas.h"
 #include "arquivo.h"
 
-#define MAIN_TESTES
+#define MAIN_TESTES 1
 
-#ifdef MAIN_TESTES
+#if MAIN_TESTES
 
 void testes();
 void teste_tabelas();
@@ -12,20 +12,25 @@ void teste_scanner();
 
 int main(int argc, char* argv[]){
 
-	testes();
-
 	Operacoes_t operacao;
 
 	// Validacao dos argumentos e decisao da operacao e
 	// Executa a operacao de acordo com o segundo argumento
 	seleciona_operacao(argc, argv);
 
+	testes();
+
 
 	return 0;
 }
 
 void testes(){
-	teste_tabelas();
+	printf("\nTabela simbolos:\n");
+	imprime_tabela(tabela_simbolos);
+	printf("\nTabela definicoes:\n");
+	imprime_tabela(tabela_definicoes);
+
+	//teste_tabelas();
 	//teste_scanner();
 
 }
@@ -33,18 +38,31 @@ void testes(){
 void teste_scanner(){
 	char teste[] = "Teste com espaco token";
 	scanner(teste, 0);
+	imprime_tokens();
 
 	strcpy(teste, "1Teste mais um");
 	scanner(teste,1);
+	imprime_tokens();
 
 	strcpy(teste, "1Teste           mais um");
 	scanner(teste,2);
+	imprime_tokens();
 
 	strcpy(teste, "1Teste\tmais um");
 	scanner(teste,3);
+	imprime_tokens();
 
 	strcpy(teste, "Teste mais um\n");
 	scanner(teste,4);
+	imprime_tokens();
+
+	strcpy(teste, "Teste\n");
+	scanner(teste,5);
+	imprime_tokens();
+
+	strcpy(teste, "A,B\n");
+	scanner(teste,5);
+	imprime_tokens();
 }
 
 void teste_tabelas(){

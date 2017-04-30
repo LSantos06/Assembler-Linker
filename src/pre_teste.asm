@@ -1,5 +1,5 @@
 L1: EQU 1
-L2: EQU 0
+L2: EQU 1
 
 SECTION TEXT
 IF L1
@@ -8,4 +8,5 @@ IF L2
 INPUT N  	;faz esta operaçao se L2 for verdadeiro
 
 SECTION DATA
-N: SPACE
+N: SPACE 3
+D: SPACE

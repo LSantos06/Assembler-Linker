@@ -21,6 +21,9 @@ void seleciona_operacao(int argc, char* argv[]){
 	char *validade_entrada_pre = ".pre";
 	char *validade_entrada_asm = ".asm";
 
+	//Cria as tabelas de simbolos e de definicoes vazias
+	inicializa_tabelas();
+
   // Abertura do arquivo para leitura
   FILE* fp = fopen(argv[2], "r");
   // Se o arquivo nao conseguiu ser aberto, ERROR -4
@@ -43,12 +46,13 @@ void seleciona_operacao(int argc, char* argv[]){
 	// Se a operacao eh montagem -o
 	if(operacao == MONTAGEM){
 		// Se o arquivo de entrada nao contem as extensoes validas, ERROR -5
-		if((strstr(argv[2], validade_entrada_pre)==NULL || strstr(argv[2], validade_entrada_asm)==NULL)){
+		if((strstr(argv[2], validade_entrada_pre)==NULL && strstr(argv[2], validade_entrada_asm)==NULL)){
 			printf("Erro: Arquivo especificado nao contem extensao '.pre' ou '.asm'!\n");
 			exit(-5);
 		}
+	// Pre processamento e
     // Montagem
-    //passagem1(fp);
+    passagem1(pre_processamento(fp, argv[3]));
     //passagem2(fp);
 	}
 }
@@ -286,8 +290,13 @@ FILE* pre_processamento(FILE *entrada, char *nome_arquivo_pre){
 	// Libera a memoria alocada para a lista de EQUS
 	libera_equ(lista_equs);
 
-	printf("Arquivo pre-processado gerado!\n");
+	//Abre pra passar pra passagem1
+	pre = fopen(arquivo_saida, "r");
+	printf("\n\nArquivo pre-processado gerado!\n");
+	return pre;
 }
+
+
 
 /* passagem1()
  *
@@ -301,25 +310,111 @@ FILE* pre_processamento(FILE *entrada, char *nome_arquivo_pre){
  *		- Contador de posicao: endereco de memoria a ser colocado simbolo
  *		- Tabela de simbolos : rotulos e simbolos declarados no programa
  *		- Tabela de diretivas: instrucoes e diretivas reconhecidas pelo montador
+ *		- (TODO) Tabela de definicoes: subconjunto da TS, para o ligador usar
 */
 FILE* passagem1(FILE *pre_processado){
 	if(pre_processado == NULL){
-		//printf("")
-	}
+	    printf("Erro na abertura do arquivo!\n");
+	    exit(-4);
+ 	}
 	int contador_posicao = 0;
 	int contador_linha = 1;
+	int i = 0;
+	int pulo = 0;
+	
+
 
 	//Cria as tabelas de simbolos e de definicoes vazias
 	inicializa_tabelas();
 
+
 	char linha[TLINHA];
 	char *instrucao;
+	char *label;
+	char *elemento;
 
 	while(!feof(pre_processado)){
 	    // Funcao fgets() lê até TLINHA caracteres ou até o '\n'
 	    instrucao = fgets(linha, TLINHA, pre_processado);
-	    //Scanner coloca em tokens_linha um vetor com os tokens da linha
-	    scanner(instrucao, contador_linha);
 
+	    if(instrucao==NULL){
+	    	break;
+	    }
+	    //Se a linha nao for nula
+	    if(instrucao[0]!='\n' && instrucao[1]!='\0'){
+
+		    //Scanner coloca em tokens_linha um vetor com os tokens da linha
+		    scanner(instrucao, contador_linha);
+
+		    //Analisar todos os tokens da linha
+		    for(i=0; tokens_linha[i]!="\0"; i++){
+		    	elemento = tokens_linha[i];
+		    	//Se ṕossuir : eh label
+		    	if(strstr(elemento, ":")!=NULL){
+		    		//Verifica se : esta no fim do token
+		    		if(elemento[strlen(elemento)-1]!=':'){
+		    			printf("\nErro na linha %d! Rótulo Inválido! ':' no meio do token\n", contador_linha);
+		    		}
+		    		else{
+		    			label = elemento;
+		    			//Retira ':'
+		    			label[strlen(label)-1] = '\0'; 
+		    			if(pertence_tabela(tabela_simbolos, label)){
+		    				printf("\nErro na linha %d! Simbolo redefinido!\n", contador_linha);
+		    			}
+		    			else{
+		    				insere_tabela(tabela_simbolos, label, contador_posicao);
+		    			} //else pertence_tabela()
+		    		} //else elemento :
+		    	} //if(strstr(elemento, ":")!=NULL)
+		    	//Se n for label, pode ser operacao ou diretiva
+		    	else{
+		    		//Retirar o \n do elemento
+		    		if(strstr(elemento,"\n")){
+		    			elemento[strlen(elemento)-1] = '\0';
+		    		}
+		    		//Se achou na tabela de instrucoes, retorna diferente de -1
+		    		pulo = tamanho_instrucao(elemento);
+		    		if(pulo!=-1){
+		    			contador_posicao += pulo + 1;
+		    			//Break pois n precisa olhar os operandos
+		    			break;
+		    		}
+		    		//Se n tiver achado na Tab Instrucoes, procura na de diretivas
+		    		else{
+		    		pulo = tamanho_diretiva(elemento, tokens_linha[i+1]);
+		    		//Se tiver achado na tabela de diretivas
+			    		if(pulo!= -1){
+			    			contador_posicao += pulo;
+			    			break;
+			    		}
+			    	//Se n tiver achado em nenhuma das 2 tabelas, erro
+			    		else{
+			    			printf("\nErro na linha %d! Operacao nao identificada\n", contador_linha);
+			    			break;
+			    		} // else (pulo!=-1) (diretiva)
+		    		} //else (pulo!=-1) (instrucao)
+		    	} //else (strstr(elemento, ";"))
+		    } //for
+		} // if instrucao nao eh nula
+		contador_linha = contador_linha + 1;
   } // while (!feof)
+
+  fclose(pre_processado);
+} //passagem1()
+
+
+void imprime_tokens(){
+	int i=0;
+
+	for(i=0; tokens_linha[i]!="\0"; i++){
+		printf("\nToken <%s>\n", tokens_linha[i]);
+
+		if(strstr(tokens_linha[i],"\n")!=NULL){
+			return;
+		}
+	}
 }
+
+
+

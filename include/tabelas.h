@@ -43,14 +43,14 @@ extern addrTab* tabela_definicoes;
 //Funcoes de manipulacao das tabelas
 void imprime_instrucoes_diretivas();
 int tamanho_instrucao(char *operacao);
-int tamanho_diretiva(char *diretiva);
+int tamanho_diretiva(char *diretiva, char* operando);
 
 //Tabela de simbolos e de definicoes
 void inicializa_tabelas(); 
 int busca_posicao_memoria(addrTab* tabela, char* nome);
 int esta_vazia(addrTab* tabela);
 int pertence_tabela(addrTab* tabela, char* nome);
-int insere_tabela(addrTab *tabela, char *nome, int posicao);
+void insere_tabela(addrTab *tabela, char *nome, int posicao);
 void imprime_tabela(addrTab *tabela);
 
 #endif 

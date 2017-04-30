@@ -23,4 +23,6 @@ FILE* pre_processamento(FILE *entrada, char* nome_arquivo_pre);
 FILE* passagem1(FILE *pre_processado);
 FILE* passagem2(FILE *arq_intermediario);
 
+void imprime_tokens();
+
 #endif
