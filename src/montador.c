@@ -4,13 +4,19 @@
 // Definicao do tamanho maximo de uma linha
 #define TLINHA 100
 
+char *tokens_linha[10];
 /*
  *  seleciona_operacao()
  *
  *  Funcao responsavel pela execucao de uma operacao de acordo
  * com o segundo argumento
  */
-void seleciona_operacao(Operacoes_t operacao, char* argv[]){
+
+void seleciona_operacao(int argc, char* argv[]){
+	Operacoes_t operacao;
+
+	operacao = validacao_argumentos(argc, argv);
+
 	// Variaveis que checam as extensoes
 	char *validade_entrada_pre = ".pre";
 	char *validade_entrada_asm = ".asm";
@@ -31,6 +37,7 @@ void seleciona_operacao(Operacoes_t operacao, char* argv[]){
 			exit(-5);
 		}
     // Pre processamento
+
     pre_processamento(fp, argv[3]);
 	}
 
@@ -47,6 +54,57 @@ void seleciona_operacao(Operacoes_t operacao, char* argv[]){
 	}
 }
 
+/* scanner()
+ * Verifica erros lexicos no programa
+ * 		- contador_linha : para impressao de erro 
+*/
+void scanner(char *linha, int contador_linha){
+	if(linha == NULL){
+		return;
+	}
+
+	char *token;
+	int erro = 0, i = 0;
+
+	//Espacao como caractere limitador
+	token = strtok(linha, " \t,");
+
+	while(token!=NULL){
+		//Se token comeca com numero, ERROR -6
+		if(token[0]>='0' && token[0]<='9'){
+			printf("Erro lexico com token '%s': inicio com digito (linha %d)\n", token, contador_linha);
+			erro = 1;
+		}
+		if(i>8){
+			printf("\nExcedeu numero de tokens!\n");
+			break;
+		}
+		// printf("<%s>\n", token);
+
+		tokens_linha[i] = strdup(token);
+		i++;
+
+		token = strtok(NULL, " \t,");
+	}
+	tokens_linha[i] = "\0";
+
+	// for(i=0; tokens_linha[i]!="\0"; i++){
+	// 	printf("Valida_Token[%d] = %s\n", i, tokens_linha[i]);
+	// }
+
+	// if(erro == 1){
+	// 	exit(-6);
+	// }	
+}
+
+// struct{
+  
+// };
+/*
+ *  pre_processamento()
+ *
+ *  Funcao responsavel pela pre pre_processamento de um arquivo .asm de entrada
+
 /*
  *  pre_processamento()
  *
@@ -55,8 +113,10 @@ void seleciona_operacao(Operacoes_t operacao, char* argv[]){
  *   - EQU, 1 operando, sempre no inicio, cria um sinonimo textual para um simbolo;
  *   - IF, 1 operando, inclui a linha seguinte somente se o operando == 1.
  */
+
 FILE* pre_processamento(FILE *entrada, char *nome_arquivo_pre){
   // while !EOF{
+>>>>>>> master
   // verificar se o inicio da linha eh um label e se a proxima palavra eh um EQU
   //  se for EQU, associar o label ao operando
   // verificar se o inicio da linha eh um IF
@@ -64,13 +124,13 @@ FILE* pre_processamento(FILE *entrada, char *nome_arquivo_pre){
   //   deixar a proxima linha
   //  se o valor do operando eh 0
   //   desconsiderar a proxima linha
+
   // }
   // rewind arquivo .asm
   // retornar novo arquivo .pre
-
   // Variaveis para verificacao das linhas
   char linha[TLINHA];
-	char escrita[TLINHA];
+  char escrita[TLINHA];
   char *instrucao;
   char *token;
 
@@ -255,4 +315,19 @@ FILE* passagem1(FILE *pre_processado){
 	}
 	int contador_posicao = 0;
 	int contador_linha = 1;
+
+	//Cria as tabelas de simbolos e de definicoes vazias
+	inicializa_tabelas();
+	
+	char linha[TLINHA];
+	char *instrucao;
+
+	while(!feof(pre_processado)){
+	    // Funcao fgets() lê até TLINHA caracteres ou até o '\n'
+	    instrucao = fgets(linha, TLINHA, pre_processado);
+	    //Scanner coloca em tokens_linha um vetor com os tokens da linha
+	    scanner(instrucao, contador_linha);
+
+  } // while (!feof)
 }
+
