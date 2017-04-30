@@ -1,6 +1,5 @@
 #include "listas.h"
 
-// FUNCOES DE LISTA ESTAO UMA MERDA
 // Inicializa lista
 void inicializa_equ(struct Equ_t *lista){
 	lista->proximo = NULL;
