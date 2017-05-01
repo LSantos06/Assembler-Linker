@@ -71,6 +71,10 @@ int tamanho_diretiva(char *diretiva, char* operando){
 			}
 			return op_space;
 		}
+		//Se n possuir operando, aloca 1 espaco
+		else{
+			return 1;
+		}
 	}
 
 	//Se n for space

@@ -50,9 +50,18 @@ void seleciona_operacao(int argc, char* argv[]){
 			printf("Erro: Arquivo especificado nao contem extensao '.pre' ou '.asm'!\n");
 			exit(-5);
 		}
+
+		//Se a extensao for .asm
+		if(strstr(argv[2], validade_entrada_pre)==NULL){
+			passagem1(pre_processamento(fp, argv[3]));
+		}
+		//Se for .pre
+		else if (strstr(argv[2], validade_entrada_asm)==NULL){
+			passagem1(fp);
+		}
 	// Pre processamento e
     // Montagem
-    passagem1(pre_processamento(fp, argv[3]));
+    
     //passagem2(fp);
 	}
 }
@@ -70,24 +79,28 @@ void scanner(char *linha, int contador_linha){
 	int erro = 0, i = 0;
 
 	//Espacao como caractere limitador
-	token = strtok(linha, " \t,");
+	token = strtok(linha, " \t,\n");
 
 	while(token!=NULL){
-		//Se token comeca com numero, ERROR -6
-		if(token[0]>='0' && token[0]<='9'){
+		tokens_linha[i] = strdup(token);
+		//Se token comeca com numero e n vem depois de uma diretiva: ERROR -6
+		if(i>0 && token[0]>='0' && token[0]<='9' && (tamanho_diretiva(tokens_linha[i-1], "\0"))==-1){
+			printf("Erro lexico com token '%s': inicio com digito (linha %d)\n", token, contador_linha);
+			erro = 1;
+		}
+		//Mesma condicao da anterior, mas sem acessar fora dos limites do vetor
+		else if(i==0 && token[0]>='0' && token[0]<='9'){
 			printf("Erro lexico com token '%s': inicio com digito (linha %d)\n", token, contador_linha);
 			erro = 1;
 		}
 		if(i>8){
-			printf("\nExcedeu numero de tokens!\n");
+			printf("\nExcedeu numero de tokens! (linha %d)\n", contador_linha);
 			break;
 		}
 		// printf("<%s>\n", token);
-
-		tokens_linha[i] = strdup(token);
 		i++;
-
-		token = strtok(NULL, " \t,");
+		//Avanca pro proximo token
+		token = strtok(NULL, " \t,\n");
 	}
 	tokens_linha[i] = "\0";
 
@@ -98,6 +111,7 @@ void scanner(char *linha, int contador_linha){
 	// if(erro == 1){
 	// 	exit(-6);
 	// }
+
 }
 
 /*
@@ -369,10 +383,6 @@ FILE* passagem1(FILE *pre_processado){
 		    	} //if(strstr(elemento, ":")!=NULL)
 		    	//Se n for label, pode ser operacao ou diretiva
 		    	else{
-		    		//Retirar o \n do elemento
-		    		if(strstr(elemento,"\n")){
-		    			elemento[strlen(elemento)-1] = '\0';
-		    		}
 		    		//Se achou na tabela de instrucoes, retorna diferente de -1
 		    		pulo = tamanho_instrucao(elemento);
 		    		if(pulo!=-1){
