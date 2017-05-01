@@ -54,3 +54,25 @@ Operacoes_t validacao_argumentos(int argc, char* argv[]){
 	// Retorna a operacao a ser realizada
 	return operacao;
 }
+
+/*
+ *  string_alta()
+ *
+ *  Funcao que passa uma string para caixa alta
+ */
+void string_alta(char *s){
+		for(; *s; s++)
+			if(('a' <= *s) && (*s <= 'z'))
+				*s = 'A' + (*s - 'a');
+}
+
+/*
+ *  string_baixa()
+ *
+ *  Funcao que passa uma string para caixa baixa
+ */
+void string_baixa(char *s){
+		for(; *s; s++)
+			if(('A' <= *s) && (*s <= 'Z'))
+				*s = 'a' + (*s - 'A');
+}

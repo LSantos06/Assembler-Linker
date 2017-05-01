@@ -1,5 +1,6 @@
 #include "montador.h"
-#include "listas.c"
+#include "listas.h"
+#include <ctype.h>
 
 // Definicao do tamanho maximo de uma linha
 #define TLINHA 100
@@ -61,7 +62,7 @@ void seleciona_operacao(int argc, char* argv[]){
 		}
 	// Pre processamento e
     // Montagem
-    
+
     //passagem2(fp);
 	}
 }
@@ -122,7 +123,6 @@ void scanner(char *linha, int contador_linha){
  *   - EQU, 1 operando, sempre no inicio, cria um sinonimo textual para um simbolo;
  *   - IF, 1 operando, inclui a linha seguinte somente se o operando == 1.
  */
-
 FILE* pre_processamento(FILE *entrada, char *nome_arquivo_pre){
   // while !EOF{
   // verificar se o inicio da linha eh um label e se a proxima palavra eh um EQU
@@ -201,6 +201,9 @@ FILE* pre_processamento(FILE *entrada, char *nome_arquivo_pre){
       // Funcao strtok() corta uma string em tokens a partir de um separador
       token = strtok(instrucao, " ");
 
+			// Passando o token para caixa alta, para fins de comparacao
+			string_alta(token);
+
       //// Se o 1 token eh "IF"
       if(!strcmp(token,"IF")){
         //printf("IF\n");
@@ -254,6 +257,9 @@ FILE* pre_processamento(FILE *entrada, char *nome_arquivo_pre){
           token = strtok(NULL, " ");
           //printf("OUTRO %s\n", token);
 
+					// Passando o token para caixa alta, para fins de comparacao
+					string_alta(token);
+
           // LABEL: EQU, linha nao eh escrita no .pre
           if(!strcmp(token,"EQU")){
 						printf("nao escreve atual\n");
@@ -296,8 +302,8 @@ FILE* pre_processamento(FILE *entrada, char *nome_arquivo_pre){
 	// Fecha o arquivo .pre
 	fclose(pre);
 
-	// Rebobina o arquivo de entrada
-	rewind(entrada);
+	// Fecha o arquivo .asm de entrada
+	fclose(entrada);
 
 	//exibe_equ(lista_equs);
 
@@ -306,7 +312,7 @@ FILE* pre_processamento(FILE *entrada, char *nome_arquivo_pre){
 
 	//Abre pra passar pra passagem1
 	pre = fopen(arquivo_saida, "r");
-	printf("\n\nArquivo pre-processado gerado!\n");
+	printf("\nArquivo pre-processado gerado!\n");
 	return pre;
 }
 
@@ -335,7 +341,7 @@ FILE* passagem1(FILE *pre_processado){
 	int contador_linha = 1;
 	int i = 0;
 	int pulo = 0;
-	
+
 
 
 	//Cria as tabelas de simbolos e de definicoes vazias
@@ -372,7 +378,7 @@ FILE* passagem1(FILE *pre_processado){
 		    		else{
 		    			label = elemento;
 		    			//Retira ':'
-		    			label[strlen(label)-1] = '\0'; 
+		    			label[strlen(label)-1] = '\0';
 		    			if(pertence_tabela(tabela_simbolos, label)){
 		    				printf("\nErro na linha %d! Simbolo redefinido!\n", contador_linha);
 		    			}
@@ -425,6 +431,3 @@ void imprime_tokens(){
 		}
 	}
 }
-
-
-
