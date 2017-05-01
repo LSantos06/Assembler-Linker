@@ -1,5 +1,6 @@
 #include "montador.h"
-#include "listas.c"
+#include "listas.h"
+#include <ctype.h>
 
 // Definicao do tamanho maximo de uma linha
 #define TLINHA 100
@@ -50,9 +51,18 @@ void seleciona_operacao(int argc, char* argv[]){
 			printf("Erro: Arquivo especificado nao contem extensao '.pre' ou '.asm'!\n");
 			exit(-5);
 		}
+
+		//Se a extensao for .asm
+		if(strstr(argv[2], validade_entrada_pre)==NULL){
+			passagem1(pre_processamento(fp, argv[3]));
+		}
+		//Se for .pre
+		else if (strstr(argv[2], validade_entrada_asm)==NULL){
+			passagem1(fp);
+		}
 	// Pre processamento e
     // Montagem
-    passagem1(pre_processamento(fp, argv[3]));
+
     //passagem2(fp);
 	}
 }
@@ -70,24 +80,28 @@ void scanner(char *linha, int contador_linha){
 	int erro = 0, i = 0;
 
 	//Espacao como caractere limitador
-	token = strtok(linha, " \t,");
+	token = strtok(linha, " \t,\n");
 
 	while(token!=NULL){
-		//Se token comeca com numero, ERROR -6
-		if(token[0]>='0' && token[0]<='9'){
+		tokens_linha[i] = strdup(token);
+		//Se token comeca com numero e n vem depois de uma diretiva: ERROR -6
+		if(i>0 && token[0]>='0' && token[0]<='9' && (tamanho_diretiva(tokens_linha[i-1], "\0"))==-1){
+			printf("Erro lexico com token '%s': inicio com digito (linha %d)\n", token, contador_linha);
+			erro = 1;
+		}
+		//Mesma condicao da anterior, mas sem acessar fora dos limites do vetor
+		else if(i==0 && token[0]>='0' && token[0]<='9'){
 			printf("Erro lexico com token '%s': inicio com digito (linha %d)\n", token, contador_linha);
 			erro = 1;
 		}
 		if(i>8){
-			printf("\nExcedeu numero de tokens!\n");
+			printf("\nExcedeu numero de tokens! (linha %d)\n", contador_linha);
 			break;
 		}
 		// printf("<%s>\n", token);
-
-		tokens_linha[i] = strdup(token);
 		i++;
-
-		token = strtok(NULL, " \t,");
+		//Avanca pro proximo token
+		token = strtok(NULL, " \t,\n");
 	}
 	tokens_linha[i] = "\0";
 
@@ -98,6 +112,7 @@ void scanner(char *linha, int contador_linha){
 	// if(erro == 1){
 	// 	exit(-6);
 	// }
+
 }
 
 /*
@@ -108,7 +123,6 @@ void scanner(char *linha, int contador_linha){
  *   - EQU, 1 operando, sempre no inicio, cria um sinonimo textual para um simbolo;
  *   - IF, 1 operando, inclui a linha seguinte somente se o operando == 1.
  */
-
 FILE* pre_processamento(FILE *entrada, char *nome_arquivo_pre){
   // while !EOF{
   // verificar se o inicio da linha eh um label e se a proxima palavra eh um EQU
@@ -187,6 +201,9 @@ FILE* pre_processamento(FILE *entrada, char *nome_arquivo_pre){
       // Funcao strtok() corta uma string em tokens a partir de um separador
       token = strtok(instrucao, " ");
 
+			// Passando o token para caixa alta, para fins de comparacao
+			string_alta(token);
+
       //// Se o 1 token eh "IF"
       if(!strcmp(token,"IF")){
         //printf("IF\n");
@@ -240,6 +257,9 @@ FILE* pre_processamento(FILE *entrada, char *nome_arquivo_pre){
           token = strtok(NULL, " ");
           //printf("OUTRO %s\n", token);
 
+					// Passando o token para caixa alta, para fins de comparacao
+					string_alta(token);
+
           // LABEL: EQU, linha nao eh escrita no .pre
           if(!strcmp(token,"EQU")){
 						printf("nao escreve atual\n");
@@ -282,8 +302,8 @@ FILE* pre_processamento(FILE *entrada, char *nome_arquivo_pre){
 	// Fecha o arquivo .pre
 	fclose(pre);
 
-	// Rebobina o arquivo de entrada
-	rewind(entrada);
+	// Fecha o arquivo .asm de entrada
+	fclose(entrada);
 
 	//exibe_equ(lista_equs);
 
@@ -292,7 +312,7 @@ FILE* pre_processamento(FILE *entrada, char *nome_arquivo_pre){
 
 	//Abre pra passar pra passagem1
 	pre = fopen(arquivo_saida, "r");
-	printf("\n\nArquivo pre-processado gerado!\n");
+	printf("\nArquivo pre-processado gerado!\n");
 	return pre;
 }
 
@@ -321,7 +341,7 @@ FILE* passagem1(FILE *pre_processado){
 	int contador_linha = 1;
 	int i = 0;
 	int pulo = 0;
-	
+
 
 
 	//Cria as tabelas de simbolos e de definicoes vazias
@@ -358,7 +378,7 @@ FILE* passagem1(FILE *pre_processado){
 		    		else{
 		    			label = elemento;
 		    			//Retira ':'
-		    			label[strlen(label)-1] = '\0'; 
+		    			label[strlen(label)-1] = '\0';
 		    			if(pertence_tabela(tabela_simbolos, label)){
 		    				printf("\nErro na linha %d! Simbolo redefinido!\n", contador_linha);
 		    			}
@@ -369,10 +389,6 @@ FILE* passagem1(FILE *pre_processado){
 		    	} //if(strstr(elemento, ":")!=NULL)
 		    	//Se n for label, pode ser operacao ou diretiva
 		    	else{
-		    		//Retirar o \n do elemento
-		    		if(strstr(elemento,"\n")){
-		    			elemento[strlen(elemento)-1] = '\0';
-		    		}
 		    		//Se achou na tabela de instrucoes, retorna diferente de -1
 		    		pulo = tamanho_instrucao(elemento);
 		    		if(pulo!=-1){
@@ -415,6 +431,3 @@ void imprime_tokens(){
 		}
 	}
 }
-
-
-

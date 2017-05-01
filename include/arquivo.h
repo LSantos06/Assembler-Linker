@@ -24,6 +24,9 @@ typedef enum {
 Operacoes_t tipo_operacao(char* string);
 // Validacao dos argumentos passados com a chamada de programa
 Operacoes_t validacao_argumentos(int argc, char* argv[]);
-
+// Funcao que passa uma string para caixa alta
+void string_alta(char *s);
+// Funcao que passa uma string para caixa baixa
+void string_baixa(char *s);
 
 #endif
