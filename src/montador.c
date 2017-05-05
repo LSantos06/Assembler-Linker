@@ -141,10 +141,11 @@ FILE* pre_processamento(FILE *entrada, char *nome_arquivo_pre){
   // Variaveis para verificacao das linhas
   char linha[TLINHA];
   char escrita[TLINHA];
+	char *aux_escrita;
   char *instrucao;
   char *token;
 
-  // Variaveis para armazenar os EQUs
+  // Variaveis para armazenar a lista de EQUs
   struct Equ_t *lista_equs = (struct Equ_t *) malloc(sizeof(struct Equ_t));
   inicializa_equ(lista_equs);
   char *label;
@@ -180,7 +181,7 @@ FILE* pre_processamento(FILE *entrada, char *nome_arquivo_pre){
 			break;
 
     // Se a linha nao eh nula
-    if(instrucao[0] != '\n' && instrucao[1] != '\0'){
+    if(instrucao[0] != '\n' && instrucao[0] != ';'){
 
 			// Retirando os comentarios
 			instrucao = strtok(instrucao, ";");
@@ -219,23 +220,27 @@ FILE* pre_processamento(FILE *entrada, char *nome_arquivo_pre){
 
 					//exibe(lista_equs);
 
-          // Busca o rotulo na lista de equs
+          // Busca o argumento do IF na lista de EQUs
           resultado_busca = busca_equ(lista_equs, token);
 
 					//printf("%s\n", resultado_busca->id);
 					//printf("%s\n", resultado_busca->valor);
 
-          // IF 1, proxima linha eh escrita
-          if(!strcmp(resultado_busca->valor, "1\n")){
-            printf("IF: escreve prox\n");
-						escreve = 1;
-          }
-          // IF 0, proxima linha nao eh escrita
-          else{
-						printf("IF: nao escreve prox\n");
-						escreve = 0;
-            //printf("nao escreve prox\n");
-          }
+					// Se o argumento do IF eh definido por EQU
+					if(resultado_busca != NULL){
+	          // IF 1, proxima linha eh escrita
+	          if(!strcmp(resultado_busca->valor, "1\n")){
+	            printf("IF: escreve prox\n");
+							escreve = 1;
+	          }
+	          // IF 0, proxima linha nao eh escrita
+	          else{
+							printf("IF: nao escreve prox\n");
+							escreve = 0;
+	            //printf("nao escreve prox\n");
+	          }
+					} // resultado_busca != NULL
+
         } // 2 token
       } // if
 
@@ -252,13 +257,26 @@ FILE* pre_processamento(FILE *entrada, char *nome_arquivo_pre){
 				// Retira o : do label para insercao na lista
 				label[strlen(label)-1] = '\n';
 
-        // Pega o 2 token para ver se eh um EQU
+        // Pega o 2 token para ver se eh um EQU ou alguma label que esta na lista de EQUS
         if(token!=NULL){
           token = strtok(NULL, " ");
           //printf("OUTRO %s\n", token);
 
 					// Passando o token para caixa alta, para fins de comparacao
 					string_alta(token);
+
+					// Buscando o token na lista de EQUS
+					resultado_busca = busca_equ(lista_equs, token);
+
+					// OUTRO ARG, Eh um argumento que esta na lista de EQUS
+					if(resultado_busca != NULL){
+						// Separa o id associado da escrita
+						aux_escrita = strtok(escrita, resultado_busca->id);
+
+						// Acrescenta o valor associado na escrita
+						strcat(aux_escrita, resultado_busca->valor);
+						strcpy(escrita, aux_escrita);
+					} // resultado_busca != NULL
 
           // LABEL: EQU, linha nao eh escrita no .pre
           if(!strcmp(token,"EQU")){
@@ -267,14 +285,35 @@ FILE* pre_processamento(FILE *entrada, char *nome_arquivo_pre){
             // Pega o 3 token, que eh o operando de EQU
             if(token!=NULL){
               token = strtok(NULL, " ");
-              //printf("EQU %s\n", token);
 
               // Insere na lista de equs
 							insere_equ(lista_equs, label, token);
             } // 3 token
-          }
-          // Linha eh escrita no .pre
+          } // token == EQU
+
+          // 2 token nao eh um EQU
           else{
+						// Pega o 3 token, se ele nao for nulo, eh uma diretiva
+						if(token!=NULL){
+							token = strtok(NULL, " ");
+
+							// LABEL: DIRETIVA OP, diretivas podem conter operandos com elemento terminal
+							if(token!=NULL){
+								// Buscando o token na lista de EQUS
+								resultado_busca = busca_equ(lista_equs, token);
+
+								// OUTRO ARG, Eh um argumento que esta na lista de EQUS
+								if(resultado_busca != NULL){
+									// Separa o id associado da escrita
+									aux_escrita = strtok(escrita, resultado_busca->id);
+
+									// Acrescenta o valor associado na escrita
+									strcat(aux_escrita, resultado_busca->valor);
+									strcpy(escrita, aux_escrita);
+								} // resultado_busca != NULL
+							}
+						} // 3 token
+
             printf("escreve atual (depende se tem IF antes)\n");
 
 						//printf("%d, %d\n", linha_anterior_if, linha_atual_if);
