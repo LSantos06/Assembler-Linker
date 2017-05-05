@@ -167,11 +167,12 @@ FILE* pre_processamento(FILE *entrada, char *nome_arquivo_pre){
     exit(-4);
  	}
 
-  // Variaveis para escrita das linhas
+  // Variaveis para escrita das linhas e erros
 	int linha_anterior_if = 0;
 	int linha_atual_if = 0;
 	int escreve = 0;
 	int contador_linha = 0;
+	int flag_equ = 0;
 
   while(!feof(entrada)){
     // Funcao fgets() lê até TLINHA caracteres ou até o '\n'
@@ -297,6 +298,11 @@ FILE* pre_processamento(FILE *entrada, char *nome_arquivo_pre){
           if(!strcmp(token,"EQU")){
 						printf("nao escreve atual\n");
 
+						// Se as EQUs nao estao no comeco do codigo
+						if(flag_equ == 1){
+							printf("Erro semântico (Linha %d): EQU não está no início do código\n", contador_linha);
+						}
+
             // Pega o 3 token, que eh o operando de EQU
             if(token!=NULL){
               token = strtok(NULL, " ");
@@ -314,6 +320,8 @@ FILE* pre_processamento(FILE *entrada, char *nome_arquivo_pre){
 
           // INSTRUCAO OP || LABEL: DIRETIVA OP, linha eh escrita, dependendo se tem IF antes
           else{
+						flag_equ = 1;
+
 						// Pega o 3 token, se ele nao for nulo, eh uma diretiva
 						if(token!=NULL){
 							token = strtok(NULL, " ");
