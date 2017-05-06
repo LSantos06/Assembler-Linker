@@ -14,7 +14,7 @@ int vazia_lista(lista_t *lista){
 }
 
 // Insere no fim da lista
-void insere_lista(lista_t *lista, char *id, char *valor){
+void insere_elemento(lista_t *lista, char *id, char *valor){
   lista_t *novo;
   novo = (lista_t *) malloc (sizeof (lista_t));
 
@@ -23,6 +23,22 @@ void insere_lista(lista_t *lista, char *id, char *valor){
   novo->proximo = lista->proximo;
 
   lista->proximo = novo;
+}
+
+// Insere uma lista em outra
+lista_t * insere_lista(lista_t *lista, lista_t *lista2){
+	if(vazia_lista(lista)){
+		return lista2;
+	}
+	else{
+		lista_t *aux = lista;
+
+		while(aux->proximo != NULL){
+			aux = aux->proximo;
+			insere_elemento(lista2, aux->id, aux->valor);
+		}
+		return lista2;
+	}
 }
 
 // Busca um id na lista e retorna o valor associado ao mesmo

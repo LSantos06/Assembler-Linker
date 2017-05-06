@@ -342,7 +342,7 @@ FILE* pre_processamento(FILE *entrada, char *nome_arquivo_pre){
 							}
 
               // Insere na lista de equs
-							insere_lista(lista_equs, label, token);
+							insere_elemento(lista_equs, label, token);
             } // 3 token
           } // token == EQU
 
