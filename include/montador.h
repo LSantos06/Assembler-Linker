@@ -6,7 +6,8 @@
 #include <string.h>
 #include "arquivo.h"
 #include "tabelas.h"
-
+#include "listas.h"
+#include "ligador.h"
 
 /*
 * Montador a ser implementado sera de 2 passagens
