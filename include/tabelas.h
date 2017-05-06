@@ -9,6 +9,8 @@
  * como funcoes para manipulacoes delas
 */
 
+/// MONTADOR
+
 //Definicao da Tabela de Instrucoes e respectiva instanciacao
 typedef struct{
 	char nome[10];
@@ -46,11 +48,13 @@ int tamanho_instrucao(char *operacao);
 int tamanho_diretiva(char *diretiva, char* operando);
 
 //Tabela de simbolos e de definicoes
-void inicializa_tabelas(); 
+void inicializa_tabelas();
 int busca_posicao_memoria(addrTab* tabela, char* nome);
 int esta_vazia(addrTab* tabela);
 int pertence_tabela(addrTab* tabela, char* nome);
 void insere_tabela(addrTab *tabela, char *nome, int posicao);
 void imprime_tabela(addrTab *tabela);
 
-#endif 
+/// LIGADOR
+
+#endif

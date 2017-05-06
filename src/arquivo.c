@@ -35,31 +35,48 @@ Operacoes_t validacao_argumentos(int argc, char* argv[]){
 	// Variavel para retorno
 	Operacoes_t operacao;
 
-	//// Se o numero de argumentos eh invalido para -p e -o, ERROR -1
-	if(tipo_operacao(argv[1])!=LIGACAO && argc!=4){
-		printf("Erro: numero de argumentos na chamada do programa eh invalido!\nObteve-se %d argumentos.\n", argc-1);
-		exit(-1);
-	}
-
-	//// Se o numero de argumentos eh invalido para -l, ERROR -1
-	if(argc>7){
-		printf("Erro: numero de argumentos na chamada do programa eh invalido!\nObteve-se %d argumentos.\n", argc-1);
-		exit(-1);
-	}
-
-	//// Se o arquivo de saida tem extensao, ERROR -2
-	// Variavel que checa a extensao do arquivo de saida
-	char *validade_saida = ".";
-	// Funcao strstr() checa se subselecao esta dentro de uma string de interesse
-	if((strstr(argv[argc-1], validade_saida))!=NULL){
-		printf("Erro: Arquivo de saida ja possui extensao!\n");
-		exit(-2);
-	}
-
-	//// Se o tipo de operacao eh diferente de -p -o e -l, ERROR -3
+	//// Se o tipo de operacao eh diferente de -p -o e -l, ERROR -1
 	if(tipo_operacao(argv[1])==ERRO){
 		printf("Erro: operacao nao reconhecida!\n");
-		exit(-3);
+		exit(-1);
+	}
+
+	//// Operacao eh a ligacao
+	if(tipo_operacao(argv[1])==LIGACAO){
+		//// Se o numero de argumentos eh invalido para ERROR -2
+		if(argc>6 || argc<5){
+			printf("Erro: numero de argumentos na chamada do programa eh invalido!\nObteve-se %d argumentos.\n", argc-1);
+			exit(-2);
+		}
+
+		//// Se o arquivo de saida tem extensao, ERROR -2
+		// Variavel que checa a extensao do arquivo de saida
+		char *validade_saida_e = ".e";
+
+		// Se o arquivo de saida nao contem a extensao valida, ERROR -3
+		if((strstr(argv[argc-1], validade_saida_e))==NULL){
+			printf("Erro: Arquivo de saida nao contem extensao '.e'!\n");
+			exit(-3);
+		}
+	}
+
+	//// Operacao eh pre-processamento ou montagem
+	else{
+		//// Se o numero de argumentos eh invalido para -p e -o, ERROR -2
+		if(argc!=4){
+			printf("Erro: numero de argumentos na chamada do programa eh invalido!\nObteve-se %d argumentos.\n", argc-1);
+			exit(-2);
+		}
+
+		//// Se o arquivo de saida tem extensao, ERROR -2
+		// Variavel que checa a extensao do arquivo de saida
+		char *validade_saida = ".";
+
+		// Funcao strstr() checa se subselecao esta dentro de uma string de interesse
+		if((strstr(argv[argc-1], validade_saida))!=NULL){
+			printf("Erro: Arquivo de saida ja possui extensao!\n");
+			exit(-2);
+		}
 	}
 
 	operacao = tipo_operacao(argv[1]);
