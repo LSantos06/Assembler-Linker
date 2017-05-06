@@ -6,7 +6,7 @@
 #include <string.h>
 
 typedef enum {
-	PRE_PROC, MONTAGEM, ERRO
+	PRE_PROC, MONTAGEM, LIGACAO, ERRO
 } Operacoes_t;
 
 /*

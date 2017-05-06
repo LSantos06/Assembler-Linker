@@ -21,6 +21,8 @@ void seleciona_operacao(int argc, char* argv[]){
 	// Variaveis que checam as extensoes
 	char *validade_entrada_pre = ".pre";
 	char *validade_entrada_asm = ".asm";
+	char *validade_entrada_o = ".o";
+	char *validade_entrada_e = ".e";
 
 	//Cria as tabelas de simbolos e de definicoes vazias
 	inicializa_tabelas();
