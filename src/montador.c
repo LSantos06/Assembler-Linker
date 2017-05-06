@@ -1,8 +1,5 @@
 #include "montador.h"
 
-// Definicao do tamanho maximo de uma linha
-#define TLINHA 100
-
 char *tokens_linha[10];
 
 /*
@@ -20,26 +17,19 @@ void seleciona_operacao(int argc, char* argv[]){
 	if(operacao == LIGACAO){
 		// Variaveis que checam as extensoes
 		char *validade_entrada_o = ".o";
-		char *validade_entrada_e = ".e";
 		int contador = 2;
 
-		while(contador < (argc-2)){
+		while(contador < (argc-1)){
 			// Se o arquivo de entrada nao contem a extensao valida, ERROR -4
 			if((strstr(argv[contador], validade_entrada_o))==NULL){
-				printf("Erro: Arquivo a ser ligado nao contem extensao '.o'!\n");
+				printf("Erro: %d Arquivo a ser ligado nao contem extensao '.o'!\n", contador-1);
 				exit(-4);
 			}
 			contador++;
 		}
 
-		// Se o arquivo de entrada nao contem a extensao valida, ERROR -4
-		if((strstr(argv[argc-2], validade_entrada_e))==NULL){
-			printf("Erro: Último arquivo a ser ligado nao contem extensao '.e'!\n");
-			exit(-4);
-		}
-
 		// Ligacao
-		ligador(argc, argv);
+		ligador(contador-2, argv);
 
 	} // ligacao
 
@@ -184,10 +174,10 @@ FILE* pre_processamento(FILE *entrada, char *nome_arquivo_pre){
   char *token;
 
   // Variaveis para armazenar a lista de EQUs
-  struct Equ_t *lista_equs = (struct Equ_t *) malloc(sizeof(struct Equ_t));
-  inicializa_equ(lista_equs);
+  lista_t *lista_equs = (lista_t *) malloc(sizeof(lista_t));
+  inicializa_lista(lista_equs);
   char *label;
-  struct Equ_t *resultado_busca;
+  lista_t *resultado_busca;
 
 	// Variaveis para criacao do arquivo pre processado
 	FILE *pre;
@@ -262,7 +252,7 @@ FILE* pre_processamento(FILE *entrada, char *nome_arquivo_pre){
 					//exibe(lista_equs);
 
           // Busca o argumento do IF na lista de EQUs
-          resultado_busca = busca_equ(lista_equs, token);
+          resultado_busca = busca_lista(lista_equs, token);
 
 					//printf("%s\n", resultado_busca->id);
 					//printf("%s\n", resultado_busca->valor);
@@ -320,7 +310,7 @@ FILE* pre_processamento(FILE *entrada, char *nome_arquivo_pre){
 					string_alta(token);
 
 					// Buscando o token na lista de EQUS
-					resultado_busca = busca_equ(lista_equs, token);
+					resultado_busca = busca_lista(lista_equs, token);
 
 					// INSTRUCAO OP, Eh uma instrucao com operando na lista de EQUS
 					if(resultado_busca != NULL){
@@ -352,7 +342,7 @@ FILE* pre_processamento(FILE *entrada, char *nome_arquivo_pre){
 							}
 
               // Insere na lista de equs
-							insere_equ(lista_equs, label, token);
+							insere_lista(lista_equs, label, token);
             } // 3 token
           } // token == EQU
 
@@ -367,7 +357,7 @@ FILE* pre_processamento(FILE *entrada, char *nome_arquivo_pre){
 							// LABEL: DIRETIVA OP, diretivas podem conter operandos com elemento terminal
 							if(token!=NULL){
 								// Buscando o token na lista de EQUS
-								resultado_busca = busca_equ(lista_equs, token);
+								resultado_busca = busca_lista(lista_equs, token);
 
 								// Operando esta na lista de EQUS
 								if(resultado_busca != NULL){
@@ -414,7 +404,7 @@ FILE* pre_processamento(FILE *entrada, char *nome_arquivo_pre){
 	//exibe_equ(lista_equs);
 
 	// Libera a memoria alocada para a lista de EQUS
-	libera_equ(lista_equs);
+	libera_lista(lista_equs);
 
 	//Abre pra passar pra passagem1
 	pre = fopen(arquivo_saida, "r");

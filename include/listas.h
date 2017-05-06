@@ -5,21 +5,22 @@
 #include <stdlib.h>
 #include <string.h>
 
-// Definicao dos atributos de um equ
-#define TEQU 10
+// Tamanho maximo dos atributos de uma lista
+#define TAMAT 10
 
 // Lista para as definicioes de equ
-struct Equ_t{
-  char id[TEQU];
-  char valor[TEQU];
-  struct Equ_t *proximo;
-};
+typedef struct lista{
+  char id[TAMAT];
+  char valor[TAMAT];
+  struct lista *proximo;
+} lista_t;
 
-void inicializa_equ(struct Equ_t *lista);
-int vazia_equ(struct Equ_t *lista);
-void insere_equ(struct Equ_t *lista, char *id, char *valor);
-struct Equ_t* busca_equ(struct Equ_t *lista, char *id_buscado);
-void exibe_equ(struct Equ_t *lista);
-void libera_equ(struct Equ_t *lista);
+// Funcoes para manipulacao das listas de EQU
+void inicializa_lista(lista_t *lista);
+int vazia_lista(lista_t *lista);
+void insere_lista(lista_t *lista, char *id, char *valor);
+lista_t* busca_lista(lista_t *lista, char *id_buscado);
+void exibe_lista(lista_t *lista);
+void libera_lista(lista_t *lista);
 
 #endif

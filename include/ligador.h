@@ -4,10 +4,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "listas.h"
+#include "arquivo.h"
+
+// Definicao do tamanho maximo de uma linha
+#define TLINHA 100
 
 /*
 * Ligador a se implementado
 */
-void ligador(int argc, char* argv[]);
+void ligador(int num_objetos, char* argv[]);
 
 #endif
