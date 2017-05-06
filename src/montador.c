@@ -1,72 +1,108 @@
 #include "montador.h"
-#include "listas.h"
-#include <ctype.h>
 
 // Definicao do tamanho maximo de uma linha
 #define TLINHA 100
 
 char *tokens_linha[10];
+
 /*
  *  seleciona_operacao()
  *
  *  Funcao responsavel pela execucao de uma operacao de acordo
  * com o segundo argumento
  */
-
 void seleciona_operacao(int argc, char* argv[]){
 	Operacoes_t operacao;
 
 	operacao = validacao_argumentos(argc, argv);
 
-	// Variaveis que checam as extensoes
-	char *validade_entrada_pre = ".pre";
-	char *validade_entrada_asm = ".asm";
-	char *validade_entrada_o = ".o";
-	char *validade_entrada_e = ".e";
+	// Se a operacao eh ligacao -l
+	if(operacao == LIGACAO){
+		// Variaveis que checam as extensoes
+		char *validade_entrada_o = ".o";
+		char *validade_entrada_e = ".e";
+		int contador = 2;
 
-	//Cria as tabelas de simbolos e de definicoes vazias
-	inicializa_tabelas();
-
-  // Abertura do arquivo para leitura
-  FILE* fp = fopen(argv[2], "r");
-  // Se o arquivo nao conseguiu ser aberto, ERROR -4
-  if(fp == NULL){
-    printf("Erro na abertura do arquivo!\n");
-    exit(-4);
- 	}
-
-	// Se a operacao eh pre processamento -p
-	if(operacao == PRE_PROC){
-		// Se o arquivo de entrada nao contem a extensao valida, ERROR -5
-		if((strstr(argv[2], validade_entrada_asm))==NULL){
-			printf("Erro: Arquivo especificado nao contem extensao '.asm'!\n");
-			exit(-5);
-		}
-    // Pre processamento
-    pre_processamento(fp, argv[3]);
-	}
-
-	// Se a operacao eh montagem -o
-	if(operacao == MONTAGEM){
-		// Se o arquivo de entrada nao contem as extensoes validas, ERROR -5
-		if((strstr(argv[2], validade_entrada_pre)==NULL && strstr(argv[2], validade_entrada_asm)==NULL)){
-			printf("Erro: Arquivo especificado nao contem extensao '.pre' ou '.asm'!\n");
-			exit(-5);
+		while(contador < (argc-2)){
+			// Se o arquivo de entrada nao contem a extensao valida, ERROR -4
+			if((strstr(argv[contador], validade_entrada_o))==NULL){
+				printf("Erro: Arquivo a ser ligado nao contem extensao '.o'!\n");
+				exit(-4);
+			}
+			contador++;
 		}
 
-		//Se a extensao for .asm
-		if(strstr(argv[2], validade_entrada_pre)==NULL){
-			passagem1(pre_processamento(fp, argv[3]));
+		// Se o arquivo de entrada nao contem a extensao valida, ERROR -4
+		if((strstr(argv[argc-2], validade_entrada_e))==NULL){
+			printf("Erro: Último arquivo a ser ligado nao contem extensao '.e'!\n");
+			exit(-4);
 		}
-		//Se for .pre
-		else if (strstr(argv[2], validade_entrada_asm)==NULL){
-			passagem1(fp);
-		}
-	// Pre processamento e
-    // Montagem
 
-    //passagem2(fp);
-	}
+		// Ligacao
+		ligador(argc, argv);
+
+	} // ligacao
+
+	// Se a operacao eh -p ou -o
+	else{
+		// Variaveis que checam as extensoes
+		char *validade_entrada_pre = ".pre";
+		char *validade_entrada_asm = ".asm";
+
+		//Cria as tabelas de simbolos e de definicoes vazias
+		inicializa_tabelas();
+
+		// Se a operacao eh pre processamento -p
+		if(operacao == PRE_PROC){
+			// Se o arquivo de entrada nao contem a extensao valida, ERROR -4
+			if((strstr(argv[2], validade_entrada_asm))==NULL){
+				printf("Erro: Arquivo a ser pre-processado nao contem extensao '.asm'!\n");
+				exit(-4);
+			}
+
+			// Abertura do arquivo para leitura
+			FILE* fp = fopen(argv[2], "r");
+			// Se o arquivo nao conseguiu ser aberto, ERROR -5
+			if(fp == NULL){
+				printf("Erro na abertura do arquivo!\n");
+				exit(-5);
+			}
+
+			// Pre processamento
+			pre_processamento(fp, argv[3]);
+
+		} // preproc
+
+		// Se a operacao eh montagem -o
+		if(operacao == MONTAGEM){
+			// Se o arquivo de entrada nao contem as extensoes validas, ERROR -4
+			if((strstr(argv[2], validade_entrada_pre)==NULL && strstr(argv[2], validade_entrada_asm)==NULL)){
+				printf("Erro: Arquivo a ser montado nao contem extensao '.pre' ou '.asm'!\n");
+				exit(-4);
+			}
+
+			// Abertura do arquivo para leitura
+			FILE* fp = fopen(argv[2], "r");
+			// Se o arquivo nao conseguiu ser aberto, ERROR -5
+			if(fp == NULL){
+				printf("Erro na abertura do arquivo!\n");
+				exit(-5);
+			}
+
+			// Se a extensao for .asm
+			if(strstr(argv[2], validade_entrada_pre)==NULL){
+				// Pre-processamento seguido da passagem 1
+				passagem1(pre_processamento(fp, argv[3]));
+			}
+			// Se for .pre
+			else if (strstr(argv[2], validade_entrada_asm)==NULL){
+				// Passagem 1
+				passagem1(fp);
+			}
+			// passagem2(fp);
+
+		} // montagem
+	} // preproc ou montagem
 }
 
 /* scanner()

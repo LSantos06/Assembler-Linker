@@ -2,17 +2,17 @@ CC= gcc
 
 CFLAGS=	-g -I$(IDIR)
 
-ODIR= obj
+ODIR = obj
 LDIR = ../lib
 IDIR = ../include
 
 LIBS= -lm
 
-_DEPS =	arquivo.h listas.h montador.h tabelas.h
+_DEPS =	arquivo.h listas.h montador.h ligador.h tabelas.h
 
 DEPS =	$(patsubst %,$(IDIR)/%,$(_DEPS))
 
-_OBJ = arquivo.o listas.o montador.o tabelas.o main.o
+_OBJ = arquivo.o listas.o montador.o tabelas.o ligador.o main.o
 
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
