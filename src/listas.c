@@ -18,11 +18,34 @@ void insere_elemento(lista_t *lista, char *id, char *valor){
   lista_t *novo;
   novo = (lista_t *) malloc (sizeof (lista_t));
 
-  strcpy(novo->id,id);
-  strcpy(novo->valor,valor);
-  novo->proximo = lista->proximo;
+	if(valor[strlen(valor)-1] < 30
+	|| valor[strlen(valor)-1] > 122){
+		 valor[strlen(valor)-1] = '\0';
+	}
 
-  lista->proximo = novo;
+	lista_t *busca;
+
+	busca = busca_elemento(lista, id);
+
+	if(valor[strlen(valor)-1] < 30
+	|| valor[strlen(valor)-1] > 122){
+		 valor[strlen(valor)-1] = '\0';
+	}
+
+	// Elemento ja esta na lista
+	if(busca!=NULL){
+		strcat(busca->valor, " ");
+		strcat(busca->valor, valor);
+	}
+	// Elemento ainda nao esta na lista
+	else{
+		strcpy(novo->id,id);
+		strcpy(novo->valor,valor);
+		novo->proximo = lista->proximo;
+
+		lista->proximo = novo;
+	}
+
 }
 
 // Insere uma lista em outra
@@ -41,8 +64,8 @@ lista_t * insere_lista(lista_t *lista, lista_t *lista2){
 	}
 }
 
-// Busca um id na lista e retorna o valor associado ao mesmo
-lista_t * busca_lista(lista_t *lista, char *id_buscado){
+// Busca um id na lista e retorna elemento
+lista_t * busca_elemento(lista_t *lista, char *id_buscado){
   lista_t *aux = lista;
 
   while (aux != NULL){
@@ -68,8 +91,8 @@ void exibe_lista(lista_t *lista){
 	lista_t *aux = lista->proximo;
 
 	while(aux!=NULL){
-		printf("id: %s ", aux->id);
-    printf("valor: %s", aux->valor);
+		printf("(id: %s ", aux->id);
+    printf("valor: %s)", aux->valor);
     printf("->");
 		aux = aux->proximo;
 	}

@@ -201,7 +201,7 @@ void ligador(int num_objetos, char* argv[]){
   //// Processo de ligacao
   // Alinhamento dos dois codigos
   codigo_final = strcat(codigo[0], codigo[1]);
-  printf("\n:::::::::::::CODIGO FINAL\n%s\n", codigo_final);
+  printf("\n:::::::::::::CODIGO INICIAL\n%s\n", codigo_final);
 
   //// Tabela global de definicoes (TGD)
   lista_t *TGD = (lista_t *) malloc(sizeof(lista_t));
@@ -211,6 +211,8 @@ void ligador(int num_objetos, char* argv[]){
   int valor_corrigido;
   // Variavel auxiliar para converter inteiro para string
   char string_valor_corrigido[15];
+
+  lista_t *resultado_busca;
 
   // Aplicando o fator de correcao nas tabelas de definicoes
   contador = 1;
@@ -226,7 +228,6 @@ void ligador(int num_objetos, char* argv[]){
 
       // Passando o valor corrigido para string
       sprintf(string_valor_corrigido, "%d", valor_corrigido);
-      strcat(string_valor_corrigido, "\n");
 
       // Insere o elemento corrigido na TGD
       insere_elemento(TGD, aux->id, string_valor_corrigido);
@@ -237,7 +238,15 @@ void ligador(int num_objetos, char* argv[]){
 
   // Insere a primeira tabela de definicoes sem fator de correcao
   TGD = insere_lista(TGD, tabela_definicao[0]);
+  printf("\n:::::::::::::TGD");
   exibe_lista(TGD);
+
+  resultado_busca = busca_elemento(tabela_uso[0], "Y");
+  if(resultado_busca != NULL){
+    printf("ID %s\n", resultado_busca->id);
+    printf("VALOR %s\n", resultado_busca->valor);
+  }
+  //exibe_lista(resultado_busca);
 
   // Referencias cruzadas utilizando enderecos da TGD
   // Enderecos impares marcados com 0 na tabela de realocacao
