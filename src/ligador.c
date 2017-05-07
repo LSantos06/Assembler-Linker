@@ -5,7 +5,7 @@
  *
  *  Funcao responsavel pela ligacao de 2 ou 3 arquivos objeto.
  */
-void ligador(int num_objetos, char* argv[]){
+void ligador(int num_objetos, int argc, char* argv[]){
   //ler os arquivos objetos
   //alinhar
   //fatores de correcao = tamanho do arquivo objeto lido
@@ -122,7 +122,7 @@ void ligador(int num_objetos, char* argv[]){
             // printf("TK: %s\n", token);
             // printf("TK2: %s\n", token2);
 
-            // Insere na tabela de uso do arquivo corrente
+            // Insere na tabela de definicao do arquivo corrente
             insere_elemento(tabela_definicao[contador_objetos], token, token2);
             //exibe_lista(tabela_definicao[contador_objetos]);
           }
@@ -207,7 +207,7 @@ void ligador(int num_objetos, char* argv[]){
   // Mesmo processo para 3 objetos
   if(num_objetos == 3){ //TODO: TESTAR
     codigo_incial = strcat(codigo_incial, codigo[2]);
-    int temanho_codigo = tamanho_objeto[0] + tamanho_objeto[1] + tamanho_objeto[2];
+    int tamanho_codigo = tamanho_objeto[0] + tamanho_objeto[1] + tamanho_objeto[2];
   }
 
   printf("\n:::::::::::::CODIGO INICIAL\n%s\n", codigo_incial);
@@ -239,7 +239,9 @@ void ligador(int num_objetos, char* argv[]){
   // Variavel auxiliar para converter inteiro para string
   char string_valor_corrigido[15];
 
-  lista_t *resultado_busca;
+  lista_t *busca_redefinicao;
+  lista_t *busca_uso;
+  lista_t *busca_uso2;
 
   // Aplicando o fator de correcao nas tabelas de definicoes
   contador = 0;
@@ -256,14 +258,73 @@ void ligador(int num_objetos, char* argv[]){
       // Passando o valor corrigido para string
       sprintf(string_valor_corrigido, "%d", valor_corrigido);
 
-      // Insere o elemento corrigido na TGD
-      insere_elemento(TGD, aux->id, string_valor_corrigido);
-    }
+      // Verifica se o simbolo esta sendo inserido duas vezes (Redefinicao)
+      busca_redefinicao = busca_elemento(TGD, aux->id);
+      if(busca_redefinicao != NULL){
+        printf("Lynking Error: símbolo %s redefinido\n", busca_redefinicao->id);
+      }
+      else{
+        // Insere o elemento corrigido na TGD
+        insere_elemento(TGD, aux->id, string_valor_corrigido);
+      }
+
+      // Verifica se o simbolo esta em alguma tabela de uso
+      // 2 objetos
+      if(num_objetos == 2){
+        // objeto 1
+        if(contador == 0){
+          // Busca o elemento na tabela de uso para saber se o mesmo eh usado
+          busca_uso = busca_elemento(tabela_uso[1], aux->id);
+          if(busca_uso == NULL){
+            printf("Lynking Warning: símbolo %s está na tabela geral de definições, mas nunca é usado\n", aux->id);
+          }
+        }
+        // objeto 2
+        else{
+          // Busca o elemento na tabela de uso para saber se o mesmo eh usado
+          busca_uso = busca_elemento(tabela_uso[0], aux->id);
+          if(busca_uso == NULL){
+            printf("Lynking Warning: símbolo %s está na tabela geral de definições, mas nunca é usado\n", aux->id);
+          }
+        }
+      }
+      // 3 objetos
+      else{
+        // objeto 1
+        if(contador == 0){
+          // Busca o elemento na tabela de uso para saber se o mesmo eh usado
+          busca_uso = busca_elemento(tabela_uso[1], aux->id);
+          busca_uso2 = busca_elemento(tabela_uso[2], aux->id);
+          if(busca_uso == NULL && busca_uso2 == NULL){
+            printf("Lynking Warning: símbolo %s está na tabela geral de definições, mas nunca é usado\n", aux->id);
+          }
+        }
+        // objeto 2
+        else if(contador == 1){
+          // Busca o elemento na tabela de uso para saber se o mesmo eh usado
+          busca_uso = busca_elemento(tabela_uso[0], aux->id);
+          busca_uso2 = busca_elemento(tabela_uso[2], aux->id);
+          if(busca_uso == NULL && busca_uso2 == NULL){
+            printf("Lynking Warning: símbolo %s está na tabela geral de definições, mas nunca é usado\n", aux->id);
+          }
+        }
+        // objeto 3
+        else{
+          // Busca o elemento na tabela de uso para saber se o mesmo eh usado
+          busca_uso = busca_elemento(tabela_uso[0], aux->id);
+          busca_uso2 = busca_elemento(tabela_uso[1], aux->id);
+          if(busca_uso == NULL && busca_uso2 == NULL){
+            printf("Lynking Warning: símbolo %s está na tabela geral de definições, mas nunca é usado\n", aux->id);
+          }
+        }
+      } // Lynking Warning
+
+    } // perocrrendo a lista
+
     //exibe_lista(TGD);
     contador++;
   }
 
-  // Insere a primeira tabela de definicoes sem fator de correcao
   printf("\n:::::::::::::TGD");
   exibe_lista(TGD);
 
@@ -277,7 +338,6 @@ void ligador(int num_objetos, char* argv[]){
 
   contador = 0;
   while (contador < num_objetos) {
-
     // Percorre a tabela de uso dos objetos
     aux_referencia = tabela_uso[contador];
     while(aux_referencia->proximo != NULL){
@@ -286,16 +346,22 @@ void ligador(int num_objetos, char* argv[]){
       // Procura simbolo na TGD
       simbolo_buscado = busca_elemento(TGD, aux_referencia->id);
 
-      // Armazena o valor do simbolo
-      valor_tgd = atoi(simbolo_buscado->valor);
+      if(simbolo_buscado == NULL){
+        printf("Lynking Error: símbolo %s está na tabela de uso, mas não está na tabela geral de definições\n", aux_referencia->id);
+      } // simbolo nao esta na TGD
 
-      // Verifica o endereco em que o simbolo se encontra, aplicando fator de correcao
-      endereco = atoi(aux_referencia->valor);
-      endereco += fator_correcao[contador];
+      else{
+        // Armazena o valor do simbolo
+        valor_tgd = atoi(simbolo_buscado->valor);
 
-      // Soma o valor do simbolo da TGD com o valor armazenado no endereco
-      vetor_codigo[endereco] += valor_tgd;
-    }
+        // Verifica o endereco em que o simbolo se encontra, aplicando fator de correcao
+        endereco = atoi(aux_referencia->valor);
+        endereco += fator_correcao[contador];
+
+        // Soma o valor do simbolo da TGD com o valor armazenado no endereco
+        vetor_codigo[endereco] += valor_tgd;
+      }
+    } // simbolo esta na TGD
 
     contador++;
   }
@@ -339,6 +405,29 @@ void ligador(int num_objetos, char* argv[]){
     contador++;
   }
   printf("\n");
+
+  //// Escrita do resultado no arquivo .e
+
+  // Abertura do arquivo para escrita
+  FILE *e;
+  e = fopen(argv[argc-1], "w");
+  // Se o arquivo nao conseguiu ser aberto, ERROR -4
+  if(e == NULL){
+    printf("Erro na abertura do arquivo!\n");
+    exit(-4);
+  }
+
+  // Percorre o vetor que contem o codigo processado e escreve no arquivo .e
+  contador = 0;
+  while (contador < tamanho_codigo) {
+    fprintf(e, "%d ", vetor_codigo[contador]);
+    contador++;
+  }
+
+  // Fecha o arquivo .e
+  fclose(e);
+
+  printf("\n##############Arquivo ligado %s gerado!\n", argv[argc-1]);
 
   return;
 }
