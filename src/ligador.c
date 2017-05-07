@@ -239,7 +239,9 @@ void ligador(int num_objetos, int argc, char* argv[]){
   // Variavel auxiliar para converter inteiro para string
   char string_valor_corrigido[15];
 
-  lista_t *resultado_busca;
+  lista_t *busca_redefinicao;
+  lista_t *busca_uso;
+  lista_t *busca_uso2;
 
   // Aplicando o fator de correcao nas tabelas de definicoes
   contador = 0;
@@ -257,20 +259,72 @@ void ligador(int num_objetos, int argc, char* argv[]){
       sprintf(string_valor_corrigido, "%d", valor_corrigido);
 
       // Verifica se o simbolo esta sendo inserido duas vezes (Redefinicao)
-      resultado_busca = busca_elemento(TGD, aux->id);
-      if(resultado_busca != NULL){
-        printf("Lynking Error: símbolo %s redefinido\n", resultado_busca->id);
+      busca_redefinicao = busca_elemento(TGD, aux->id);
+      if(busca_redefinicao != NULL){
+        printf("Lynking Error: símbolo %s redefinido\n", busca_redefinicao->id);
       }
       else{
         // Insere o elemento corrigido na TGD
         insere_elemento(TGD, aux->id, string_valor_corrigido);
       }
-    }
+
+      // Verifica se o simbolo esta em alguma tabela de uso
+      // 2 objetos
+      if(num_objetos == 2){
+        // objeto 1
+        if(contador == 0){
+          // Busca o elemento na tabela de uso para saber se o mesmo eh usado
+          busca_uso = busca_elemento(tabela_uso[1], aux->id);
+          if(busca_uso == NULL){
+            printf("Lynking Warning: símbolo %s está na tabela geral de definições, mas nunca é usado\n", aux->id);
+          }
+        }
+        // objeto 2
+        else{
+          // Busca o elemento na tabela de uso para saber se o mesmo eh usado
+          busca_uso = busca_elemento(tabela_uso[0], aux->id);
+          if(busca_uso == NULL){
+            printf("Lynking Warning: símbolo %s está na tabela geral de definições, mas nunca é usado\n", aux->id);
+          }
+        }
+      }
+      // 3 objetos
+      else{
+        // objeto 1
+        if(contador == 0){
+          // Busca o elemento na tabela de uso para saber se o mesmo eh usado
+          busca_uso = busca_elemento(tabela_uso[1], aux->id);
+          busca_uso2 = busca_elemento(tabela_uso[2], aux->id);
+          if(busca_uso == NULL && busca_uso2 == NULL){
+            printf("Lynking Warning: símbolo %s está na tabela geral de definições, mas nunca é usado\n", aux->id);
+          }
+        }
+        // objeto 2
+        else if(contador == 1){
+          // Busca o elemento na tabela de uso para saber se o mesmo eh usado
+          busca_uso = busca_elemento(tabela_uso[0], aux->id);
+          busca_uso2 = busca_elemento(tabela_uso[2], aux->id);
+          if(busca_uso == NULL && busca_uso2 == NULL){
+            printf("Lynking Warning: símbolo %s está na tabela geral de definições, mas nunca é usado\n", aux->id);
+          }
+        }
+        // objeto 3
+        else{
+          // Busca o elemento na tabela de uso para saber se o mesmo eh usado
+          busca_uso = busca_elemento(tabela_uso[0], aux->id);
+          busca_uso2 = busca_elemento(tabela_uso[1], aux->id);
+          if(busca_uso == NULL && busca_uso2 == NULL){
+            printf("Lynking Warning: símbolo %s está na tabela geral de definições, mas nunca é usado\n", aux->id);
+          }
+        }
+      } // Lynking Warning
+
+    } // perocrrendo a lista
+
     //exibe_lista(TGD);
     contador++;
   }
 
-  // Insere a primeira tabela de definicoes sem fator de correcao
   printf("\n:::::::::::::TGD");
   exibe_lista(TGD);
 
