@@ -5,7 +5,7 @@
  *
  *  Funcao responsavel pela ligacao de 2 ou 3 arquivos objeto.
  */
-void ligador(int num_objetos, char* argv[]){
+void ligador(int num_objetos, int argc, char* argv[]){
   //ler os arquivos objetos
   //alinhar
   //fatores de correcao = tamanho do arquivo objeto lido
@@ -339,6 +339,29 @@ void ligador(int num_objetos, char* argv[]){
     contador++;
   }
   printf("\n");
+
+  //// Escrita do resultado no arquivo .e
+
+  // Abertura do arquivo para escrita
+  FILE *e;
+  e = fopen(argv[argc-1], "w");
+  // Se o arquivo nao conseguiu ser aberto, ERROR -4
+  if(e == NULL){
+    printf("Erro na abertura do arquivo!\n");
+    exit(-4);
+  }
+
+  // Percorre o vetor que contem o codigo processado e escreve no arquivo .e
+  contador = 0;
+  while (contador < tamanho_codigo) {
+    fprintf(e, "%d ", vetor_codigo[contador]);
+    contador++;
+  }
+
+  // Fecha o arquivo .e
+  fclose(e);
+
+  printf("\n##############Arquivo ligado %s gerado!\n", argv[argc-1]);
 
   return;
 }

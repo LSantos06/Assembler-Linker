@@ -29,7 +29,7 @@ void seleciona_operacao(int argc, char* argv[]){
 		}
 
 		// Ligacao
-		ligador(contador-2, argv);
+		ligador(contador-2, argc, argv);
 
 	} // ligacao
 
@@ -164,7 +164,7 @@ FILE* pre_processamento(FILE *entrada, char *nome_arquivo_pre){
   // rewind arquivo .asm
   // retornar novo arquivo .pre
 
-	printf("\n\nPre Processamento: \n");
+	printf("\n:::::::::::::PRE PROCESSAMENTO\n");
 
   // Variaveis para verificacao das linhas
   char linha[TLINHA];
@@ -421,7 +421,7 @@ FILE* pre_processamento(FILE *entrada, char *nome_arquivo_pre){
 
 	//Abre pra passar pra passagem1
 	pre = fopen(arquivo_saida, "r");
-	printf("\nArquivo pre-processado gerado!\n");
+	printf("\n##############Arquivo pre-processado %s gerado!\n", arquivo_saida);
 	return pre;
 }
 
