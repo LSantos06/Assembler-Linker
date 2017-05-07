@@ -195,13 +195,40 @@ void ligador(int num_objetos, char* argv[]){
     contador++;
   }
 
-  // Variavel que contem o código final a ser impresso no .e
-  char *codigo_final;
+  // Variavel que contem o código inicial que sera processado para ser impresso no .e
+  char *codigo_incial;
 
   //// Processo de ligacao
-  // Alinhamento dos dois codigos
-  codigo_final = strcat(codigo[0], codigo[1]);
-  printf("\n:::::::::::::CODIGO INICIAL\n%s\n", codigo_final);
+  // Alinhamento dos codigos objetos
+  codigo_incial = strcat(codigo[0], codigo[1]);
+  // Vetor que ira conter o codigo em inteiro
+  int tamanho_codigo = tamanho_objeto[0] + tamanho_objeto[1];
+
+  // Mesmo processo para 3 objetos
+  if(num_objetos == 3){ //TODO: TESTAR
+    codigo_incial = strcat(codigo_incial, codigo[2]);
+    int temanho_codigo = tamanho_objeto[0] + tamanho_objeto[1] + tamanho_objeto[2];
+  }
+
+  printf("\n:::::::::::::CODIGO INICIAL\n%s\n", codigo_incial);
+
+  // Definicao do tamanho do vetor de inteiros
+  int vetor_codigo[tamanho_codigo];
+  // Variavel auxiliar para criacao do vetor de inteiros que representa o codigo
+  char *token_endereco;
+
+  //// Preenchendo o vetor de codigo inteiro
+  // Pega o token inicial e armazena no comeco do vetor
+  token_endereco = strtok(codigo_incial, " ");
+  vetor_codigo[0] = atoi(token_endereco);
+
+  // Loop para armazenamento do resto dos tokens no vetor
+  contador = 1;
+  while(contador < tamanho_codigo){
+    token_endereco = strtok(NULL, " ");
+    vetor_codigo[contador] = atoi(token_endereco);
+    contador++;
+  }
 
   //// Tabela global de definicoes (TGD)
   lista_t *TGD = (lista_t *) malloc(sizeof(lista_t));
@@ -215,7 +242,7 @@ void ligador(int num_objetos, char* argv[]){
   lista_t *resultado_busca;
 
   // Aplicando o fator de correcao nas tabelas de definicoes
-  contador = 1;
+  contador = 0;
   while (contador < num_objetos) {
     lista_t *aux = tabela_definicao[contador];
 
@@ -237,22 +264,81 @@ void ligador(int num_objetos, char* argv[]){
   }
 
   // Insere a primeira tabela de definicoes sem fator de correcao
-  TGD = insere_lista(TGD, tabela_definicao[0]);
   printf("\n:::::::::::::TGD");
   exibe_lista(TGD);
 
-  resultado_busca = busca_elemento(tabela_uso[0], "Y");
-  if(resultado_busca != NULL){
-    printf("ID %s\n", resultado_busca->id);
-    printf("VALOR %s\n", resultado_busca->valor);
+  //// Referencias cruzadas utilizando enderecos da TGD
+
+  // Variavel utilizadas para resolver referencias cruzadas
+  lista_t *aux_referencia;
+  lista_t *simbolo_buscado;
+  int endereco;
+  int valor_tgd;
+
+  contador = 0;
+  while (contador < num_objetos) {
+
+    // Percorre a tabela de uso dos objetos
+    aux_referencia = tabela_uso[contador];
+    while(aux_referencia->proximo != NULL){
+      aux_referencia = aux_referencia->proximo;
+
+      // Procura simbolo na TGD
+      simbolo_buscado = busca_elemento(TGD, aux_referencia->id);
+
+      // Armazena o valor do simbolo
+      valor_tgd = atoi(simbolo_buscado->valor);
+
+      // Verifica o endereco em que o simbolo se encontra, aplicando fator de correcao
+      endereco = atoi(aux_referencia->valor);
+      endereco += fator_correcao[contador];
+
+      // Soma o valor do simbolo da TGD com o valor armazenado no endereco
+      vetor_codigo[endereco] += valor_tgd;
+    }
+
+    contador++;
   }
-  //exibe_lista(resultado_busca);
 
-  // Referencias cruzadas utilizando enderecos da TGD
-  // Enderecos impares marcados com 0 na tabela de realocacao
+  printf(":::::::::::::CODIGO REF CRUZADAS\n");
+  contador = 0;
+  while(contador < tamanho_codigo){
+    printf("%d ", vetor_codigo[contador]);
+    contador++;
+  }
+  printf("\n");
 
-  // Aplica fator de correcao aos enderecos relativos no codigo
-  // Enderecos marcados com 1 na tabela de realocacao
+  //// Fator de correcao aos enderecos relativos no codigo
+
+  // Variavel para percorrer a tabela de realocacao
+  char aux_relativo[TLINHA];
+
+  contador = 0;
+  while (contador < num_objetos) {
+    // Armazenamento da linha em um vetor
+    strcpy(aux_relativo, tabela_realocao[contador]);
+
+    // Fator de correcao
+    endereco = 0;
+    // Percorre a tabela de realocacao
+    while(aux_relativo[endereco] != '\0'){
+      // Se o endereco eh sinzalizado como relativo
+      if(aux_relativo[endereco] == '1'){
+        // Soma o fator de correcao ao endereco relativo
+        vetor_codigo[endereco+fator_correcao[contador]] += fator_correcao[contador];
+      }
+      endereco++;
+    }
+    contador++;
+  }
+
+  printf("\n:::::::::::::CODIGO FINAL\n");
+  contador = 0;
+  while(contador < tamanho_codigo){
+    printf("%d ", vetor_codigo[contador]);
+    contador++;
+  }
+  printf("\n");
 
   return;
 }

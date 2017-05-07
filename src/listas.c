@@ -33,18 +33,18 @@ void insere_elemento(lista_t *lista, char *id, char *valor){
 	}
 
 	// Elemento ja esta na lista
-	if(busca!=NULL){
-		strcat(busca->valor, " ");
-		strcat(busca->valor, valor);
-	}
-	// Elemento ainda nao esta na lista
-	else{
+	// if(busca!=NULL){
+	// 	strcat(busca->valor, " ");
+	// 	strcat(busca->valor, valor);
+	// }
+	// // Elemento ainda nao esta na lista
+	// else{
 		strcpy(novo->id,id);
 		strcpy(novo->valor,valor);
 		novo->proximo = lista->proximo;
 
 		lista->proximo = novo;
-	}
+	// }
 
 }
 
