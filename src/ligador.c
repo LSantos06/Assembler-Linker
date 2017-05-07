@@ -40,20 +40,17 @@ void ligador(int num_objetos, char* argv[]){
     inicializa_lista(tabela_definicao[contador]);
     contador++;
   }
-  char *tabela_realocao[num_objetos];
-  char *codigo[num_objetos];
+  char tabela_realocao[num_objetos][TLINHA];
+  char codigo[num_objetos][TLINHA];
 
-  // Variaveis auxiliares para armazenamento da tabela de realocao e do codigo
-  char info_realocacao[TLINHA];
-  char info_codigo[TLINHA];
-
-  // Fatores de correcao de cada arquivo
+  // Tamanho do objeto que determina o fator de correcao
+  char aux_tamanho[TLINHA];
+  int tamanho_objeto[num_objetos];
   int fator_correcao[num_objetos];
-  char *conta_char;
 
+  //// Obtendo as informacoes de cada .o
   // Enquanto os arquivos objetos nao foram processados
   while(contador_objetos!=num_objetos){
-    printf(":::::::::::::::: ARQUIVO OBJETO %d\n", contador_objetos+1);
 
     // Abertura do arquivo para leitura
     FILE* fp = fopen(argv[contador_objetos+num_objetos], "r");
@@ -106,7 +103,7 @@ void ligador(int num_objetos, char* argv[]){
             // printf("TK2: %s\n", token2);
 
             // Insere na tabela de uso do arquivo corrente
-            insere_lista(tabela_uso[contador_objetos], token, token2);
+            insere_elemento(tabela_uso[contador_objetos], token, token2);
             //exibe_lista(tabela_uso[contador_objetos]);
           }
         } // uso
@@ -126,39 +123,34 @@ void ligador(int num_objetos, char* argv[]){
             // printf("TK2: %s\n", token2);
 
             // Insere na tabela de uso do arquivo corrente
-            insere_lista(tabela_definicao[contador_objetos], token, token2);
+            insere_elemento(tabela_definicao[contador_objetos], token, token2);
             //exibe_lista(tabela_definicao[contador_objetos]);
           }
         } // definicao
 
         else if(flag == 3){
-          // Armazenamento da linha em um vetor
-          strcpy(info_realocacao, elemento);
-
-          // Fator de correcao
-          fator_correcao[contador_objetos] = 0;
-          // Se nao for o primeiro .o
-          if(contador_objetos > 0){
-            contador = 0;
-            // Conta o numero de enderecos sinalizados na tabela de realocao
-            while(info_realocacao[contador] != '\0'){
-              contador++;
-            }
-            // Armazena o fator de correcao
-            fator_correcao[contador_objetos] = contador-1;
-          }
-
           // Insere na tabela de realocacao do arquivo corrente
-          tabela_realocao[contador_objetos] = info_realocacao;
+          strcpy(tabela_realocao[contador_objetos], elemento);
           //printf("%s\n", tabela_realocao[contador_objetos]);
 
-        } // realocao
+          // Armazenamento da linha em um vetor
+          strcpy(aux_tamanho, elemento);
+
+          // Fator de correcao
+          contador = 0;
+          // Conta o numero de enderecos sinalizados na tabela de realocao
+          while(aux_tamanho[contador] != '\0'){
+            contador++;
+          }
+          // Armazena o fator de correcao
+          tamanho_objeto[contador_objetos] = contador-1;
+
+        } // realocacao
 
         else if(flag == 4){
-          // Armazenamento da linha em um vetor
-          strcpy(info_codigo, elemento);
+          elemento[strlen(elemento)-1] = ' ';
           // Guarda o codigo objeto do arquivo corrente
-          codigo[contador_objetos] = info_codigo;
+          strcpy(codigo[contador_objetos], elemento);
           //printf("%s\n", codigo[contador_objetos]);
 
         } // codigo
@@ -167,16 +159,15 @@ void ligador(int num_objetos, char* argv[]){
 
     } // feof
 
-    printf("Tabela de USO");
-    exibe_lista(tabela_uso[contador_objetos]);
-    printf("Tabela de DEFINICAO");
-    exibe_lista(tabela_definicao[contador_objetos]);
-    printf("Tabela de REALOCACAO\n");
-    printf("%s\n", tabela_realocao[contador_objetos]);
-    printf("CODIGO OBJETO\n");
-    printf("%s\n", codigo[contador_objetos]);
-    printf("FATOR CORRECAO\n");
-    printf("%d\n", fator_correcao[contador_objetos]);
+    // Determinando os fatores de correcao
+    if(contador_objetos == 0){
+      // Se for o primeiro objeto eh 0
+      fator_correcao[contador_objetos] = 0;
+    }
+    else{
+      // Fator de correcao eh igual ao tamanho do objeto anterior
+      fator_correcao[contador_objetos] = tamanho_objeto[contador_objetos-1];
+    }
 
     // Fecha o arquivo objeto atual
     fclose(fp);
@@ -184,6 +175,84 @@ void ligador(int num_objetos, char* argv[]){
     // Passa para o proximo arquivo objeto
     contador_objetos++;
   }
+
+  contador = 0;
+  while(contador < num_objetos){
+    printf("\n::::::::::::ARQUIVO OBJETO %d\n\n", contador+1);
+    printf("Tabela de USO");
+    exibe_lista(tabela_uso[contador]);
+    printf("Tabela de DEFINICAO");
+    exibe_lista(tabela_definicao[contador]);
+    printf("Tabela de REALOCACAO\n");
+    printf("%s\n", tabela_realocao[contador]);
+    printf("CODIGO OBJETO\n");
+    printf("%s\n\n", codigo[contador]);
+    printf("TAMANHO OBJETO\n");
+    printf("%d\n\n", tamanho_objeto[contador]);
+    printf("FATOR CORRECAO\n");
+    printf("%d\n", fator_correcao[contador]);
+
+    contador++;
+  }
+
+  // Variavel que contem o código final a ser impresso no .e
+  char *codigo_final;
+
+  //// Processo de ligacao
+  // Alinhamento dos dois codigos
+  codigo_final = strcat(codigo[0], codigo[1]);
+  printf("\n:::::::::::::CODIGO INICIAL\n%s\n", codigo_final);
+
+  //// Tabela global de definicoes (TGD)
+  lista_t *TGD = (lista_t *) malloc(sizeof(lista_t));
+  inicializa_lista(TGD);
+
+  // Variavel para guardar o valor com o fator de correcao
+  int valor_corrigido;
+  // Variavel auxiliar para converter inteiro para string
+  char string_valor_corrigido[15];
+
+  lista_t *resultado_busca;
+
+  // Aplicando o fator de correcao nas tabelas de definicoes
+  contador = 1;
+  while (contador < num_objetos) {
+    lista_t *aux = tabela_definicao[contador];
+
+    // Percorre a lista do objeto
+    while(aux->proximo != NULL){
+      aux = aux->proximo;
+
+      // Aplicando o fator de correcao ao valor
+      valor_corrigido = atoi(aux->valor) + fator_correcao[contador];
+
+      // Passando o valor corrigido para string
+      sprintf(string_valor_corrigido, "%d", valor_corrigido);
+
+      // Insere o elemento corrigido na TGD
+      insere_elemento(TGD, aux->id, string_valor_corrigido);
+    }
+    //exibe_lista(TGD);
+    contador++;
+  }
+
+  // Insere a primeira tabela de definicoes sem fator de correcao
+  TGD = insere_lista(TGD, tabela_definicao[0]);
+  printf("\n:::::::::::::TGD");
+  exibe_lista(TGD);
+
+  resultado_busca = busca_elemento(tabela_uso[0], "Y");
+  if(resultado_busca != NULL){
+    printf("ID %s\n", resultado_busca->id);
+    printf("VALOR %s\n", resultado_busca->valor);
+  }
+  //exibe_lista(resultado_busca);
+
+  // Referencias cruzadas utilizando enderecos da TGD
+  // Enderecos impares marcados com 0 na tabela de realocacao
+
+  // Aplica fator de correcao aos enderecos relativos no codigo
+  // Enderecos marcados com 1 na tabela de realocacao
 
   return;
 }

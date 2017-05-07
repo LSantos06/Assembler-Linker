@@ -169,7 +169,9 @@ FILE* pre_processamento(FILE *entrada, char *nome_arquivo_pre){
   // Variaveis para verificacao das linhas
   char linha[TLINHA];
   char escrita[TLINHA];
+	char aux_escrita_diretiva[TLINHA];
 	char *aux_escrita;
+	char *aux_escrita2;
   char *instrucao;
   char *token;
 
@@ -252,20 +254,17 @@ FILE* pre_processamento(FILE *entrada, char *nome_arquivo_pre){
 					//exibe(lista_equs);
 
           // Busca o argumento do IF na lista de EQUs
-          resultado_busca = busca_lista(lista_equs, token);
-
-					//printf("%s\n", resultado_busca->id);
-					//printf("%s\n", resultado_busca->valor);
+          resultado_busca = busca_elemento(lista_equs, token);
 
 					// Se o argumento do IF eh definido por EQU
 					if(resultado_busca != NULL){
 	          // IF 1, proxima linha eh escrita
-	          if(!strcmp(resultado_busca->valor, "1\n")){
+	          if(!strcmp(resultado_busca->valor, "1")){
 	            printf("IF: escreve prox\n");
 							escreve = 1;
 	          }
 	          // IF 0, proxima linha nao eh escrita
-	          else if(!strcmp(resultado_busca->valor, "0\n")){
+	          else if(!strcmp(resultado_busca->valor, "0")){
 							printf("IF: nao escreve prox\n");
 							escreve = 0;
 	            //printf("nao escreve prox\n");
@@ -304,21 +303,23 @@ FILE* pre_processamento(FILE *entrada, char *nome_arquivo_pre){
         // Pega o 2 token para ver se eh um EQU ou alguma label que esta na lista de EQUS
         if(token!=NULL){
           token = strtok(NULL, " ");
-          //printf("OUTRO %s\n", token);
+          //printf("OUTRO %s", token);
 
 					// Passando o token para caixa alta, para fins de comparacao
 					string_alta(token);
 
 					// Buscando o token na lista de EQUS
-					resultado_busca = busca_lista(lista_equs, token);
+					resultado_busca = busca_elemento(lista_equs, token);
 
 					// INSTRUCAO OP, Eh uma instrucao com operando na lista de EQUS
 					if(resultado_busca != NULL){
 						// Separa o id associado da escrita
-						aux_escrita = strtok(escrita, resultado_busca->id);
+						aux_escrita = strtok(escrita, " ");
 
 						// Acrescenta o valor associado na escrita
+						strcat(aux_escrita, " ");
 						strcat(aux_escrita, resultado_busca->valor);
+						strcat(aux_escrita, "\n");
 						strcpy(escrita, aux_escrita);
 					} // resultado_busca != NULL
 
@@ -342,7 +343,13 @@ FILE* pre_processamento(FILE *entrada, char *nome_arquivo_pre){
 							}
 
               // Insere na lista de equs
-							insere_lista(lista_equs, label, token);
+							if(busca_elemento(lista_equs, label) == NULL){
+								insere_elemento(lista_equs, label, token);
+							}
+							else{
+								label[strlen(label)-1] = '\0';
+								printf("Erro semântico (Linha %d): Label %s ja definida!\n\n", contador_linha, label);
+							}
             } // 3 token
           } // token == EQU
 
@@ -357,15 +364,21 @@ FILE* pre_processamento(FILE *entrada, char *nome_arquivo_pre){
 							// LABEL: DIRETIVA OP, diretivas podem conter operandos com elemento terminal
 							if(token!=NULL){
 								// Buscando o token na lista de EQUS
-								resultado_busca = busca_lista(lista_equs, token);
+								resultado_busca = busca_elemento(lista_equs, token);
 
 								// Operando esta na lista de EQUS
 								if(resultado_busca != NULL){
 									// Separa o id associado da escrita
-									aux_escrita = strtok(escrita, resultado_busca->id);
+									aux_escrita = strtok(escrita, " ");
+									aux_escrita2 = strtok(NULL, " ");
+									strcpy(aux_escrita_diretiva, aux_escrita2);
 
 									// Acrescenta o valor associado na escrita
+									strcat(aux_escrita, " ");
+									strcat(aux_escrita, aux_escrita_diretiva);
+									strcat(aux_escrita, " ");
 									strcat(aux_escrita, resultado_busca->valor);
+									strcat(aux_escrita, "\n");
 									strcpy(escrita, aux_escrita);
 								} // resultado_busca != NULL
 							} // diretiva

@@ -8,5 +8,5 @@ iF L2
 INPUT N  	;faz esta operaçao se L2 for verdadeiro
 
 SECTION DATA
-N: SPACE L1
-D: SPACE
+N: CONST L1
+D: SPACE L2

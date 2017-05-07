@@ -14,5 +14,4 @@
 * Ligador a se implementado
 */
 void ligador(int num_objetos, char* argv[]);
-
 #endif
