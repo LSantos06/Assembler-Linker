@@ -122,7 +122,7 @@ void ligador(int num_objetos, int argc, char* argv[]){
             // printf("TK: %s\n", token);
             // printf("TK2: %s\n", token2);
 
-            // Insere na tabela de uso do arquivo corrente
+            // Insere na tabela de definicao do arquivo corrente
             insere_elemento(tabela_definicao[contador_objetos], token, token2);
             //exibe_lista(tabela_definicao[contador_objetos]);
           }
@@ -207,7 +207,7 @@ void ligador(int num_objetos, int argc, char* argv[]){
   // Mesmo processo para 3 objetos
   if(num_objetos == 3){ //TODO: TESTAR
     codigo_incial = strcat(codigo_incial, codigo[2]);
-    int temanho_codigo = tamanho_objeto[0] + tamanho_objeto[1] + tamanho_objeto[2];
+    int tamanho_codigo = tamanho_objeto[0] + tamanho_objeto[1] + tamanho_objeto[2];
   }
 
   printf("\n:::::::::::::CODIGO INICIAL\n%s\n", codigo_incial);
@@ -256,8 +256,15 @@ void ligador(int num_objetos, int argc, char* argv[]){
       // Passando o valor corrigido para string
       sprintf(string_valor_corrigido, "%d", valor_corrigido);
 
-      // Insere o elemento corrigido na TGD
-      insere_elemento(TGD, aux->id, string_valor_corrigido);
+      // Verifica se o simbolo esta sendo inserido duas vezes (Redefinicao)
+      resultado_busca = busca_elemento(TGD, aux->id);
+      if(resultado_busca != NULL){
+        printf("Lynking Error: símbolo %s redefinido\n", resultado_busca->id);
+      }
+      else{
+        // Insere o elemento corrigido na TGD
+        insere_elemento(TGD, aux->id, string_valor_corrigido);
+      }
     }
     //exibe_lista(TGD);
     contador++;
@@ -277,7 +284,6 @@ void ligador(int num_objetos, int argc, char* argv[]){
 
   contador = 0;
   while (contador < num_objetos) {
-
     // Percorre a tabela de uso dos objetos
     aux_referencia = tabela_uso[contador];
     while(aux_referencia->proximo != NULL){
@@ -286,16 +292,22 @@ void ligador(int num_objetos, int argc, char* argv[]){
       // Procura simbolo na TGD
       simbolo_buscado = busca_elemento(TGD, aux_referencia->id);
 
-      // Armazena o valor do simbolo
-      valor_tgd = atoi(simbolo_buscado->valor);
+      if(simbolo_buscado == NULL){
+        printf("Lynking Error: símbolo %s está na tabela de uso, mas não está na tabela geral de definições\n", aux_referencia->id);
+      } // simbolo nao esta na TGD
 
-      // Verifica o endereco em que o simbolo se encontra, aplicando fator de correcao
-      endereco = atoi(aux_referencia->valor);
-      endereco += fator_correcao[contador];
+      else{
+        // Armazena o valor do simbolo
+        valor_tgd = atoi(simbolo_buscado->valor);
 
-      // Soma o valor do simbolo da TGD com o valor armazenado no endereco
-      vetor_codigo[endereco] += valor_tgd;
-    }
+        // Verifica o endereco em que o simbolo se encontra, aplicando fator de correcao
+        endereco = atoi(aux_referencia->valor);
+        endereco += fator_correcao[contador];
+
+        // Soma o valor do simbolo da TGD com o valor armazenado no endereco
+        vetor_codigo[endereco] += valor_tgd;
+      }
+    } // simbolo esta na TGD
 
     contador++;
   }
