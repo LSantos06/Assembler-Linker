@@ -31,19 +31,25 @@ clean:
 	rm -f $(ODIR)/*.o *~ core $(IDIR)/*~
 
 preproc:
-	./prog -p pre_teste.asm pre_teste
+	./prog -p $(file_name).asm $(file_name)
 
 valpreproc:
-	valgrind ./prog -p pre_teste.asm pre_teste
+	valgrind ./prog -p $(file_name).asm $(file_name)
 
 monta_asm:
-	./prog -o pre_teste.asm pre_teste
+	./prog -o $(file_name).asm $(file_name)
 
 valmonta_asm:
-	valgrind ./prog -o pre_teste.asm pre_teste
+	valgrind ./prog -o $(file_name).asm $(file_name)
 
 monta_pre:
-	./prog -o pre_teste.pre pre_teste
+	./prog -o $(file_name).pre $(file_name)
 
 valmonta_pre:
-	valgrind ./prog -o pre_teste.pre pre_teste
+	valgrind ./prog -o $(file_name).pre $(file_name)
+
+liga:
+	./prog -l $(o1) $(o2) $(o3) $(e)
+
+valliga:
+	valgrind ./prog -l $(o1) $(o2) $(o3) $(e)
