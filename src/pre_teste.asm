@@ -1,6 +1,9 @@
 L1: eqU 1
 L2: eqU 0
 
+Y: EXTERN
+PUBLIC N
+
 SECTION TEXT
 iF L1
 LOAD N 		;faz esta operaçao se L1 for verdadeiro

@@ -35,43 +35,43 @@ void testes(){
 
 void teste_scanner(){
 	char teste[] = "Teste com espaco token";
-	scanner(teste, 0);
+	scanner(teste, 0, " \n\t");
 	imprime_tokens();
 
 	strcpy(teste, "1Teste mais um");
-	scanner(teste,1);
+	scanner(teste,1, " \n\t");
 	imprime_tokens();
 
 	strcpy(teste, "1Teste           mais um");
-	scanner(teste,2);
+	scanner(teste,2, " \n\t");
 	imprime_tokens();
 
 	strcpy(teste, "1Teste\tmais um");
-	scanner(teste,3);
+	scanner(teste,3, " \n\t");
 	imprime_tokens();
 
 	strcpy(teste, "Teste mais um\n");
-	scanner(teste,4);
+	scanner(teste,4, " \n\t");
 	imprime_tokens();
 
 	strcpy(teste, "Teste\n");
-	scanner(teste,5);
+	scanner(teste,5, " \n\t");
 	imprime_tokens();
 
 	strcpy(teste, "A,B\n");
-	scanner(teste,5);
+	scanner(teste,5, " \n\t,");
 	imprime_tokens();
 }
 
 void teste_tabelas(){
 	inicializa_tabelas();
 
-	insere_tabela(tabela_simbolos, "exemplo1", 10);
-	insere_tabela(tabela_simbolos, "exemplo2", 5);
-	insere_tabela(tabela_simbolos, "exemplo3", 15);
+	insere_tabela(tabela_simbolos, "exemplo1", 10, 0);
+	insere_tabela(tabela_simbolos, "exemplo2", 5, 0);
+	insere_tabela(tabela_simbolos, "exemplo3", 15, 0);
 
-	insere_tabela(tabela_definicoes, "exemplo1", 15);
-	insere_tabela(tabela_definicoes, "exemplo2", 3);
+	insere_tabela(tabela_definicoes, "exemplo1", 15, 0);
+	insere_tabela(tabela_definicoes, "exemplo2", 3, 0);
 
 	imprime_tabela(tabela_simbolos);
 	imprime_tabela(tabela_definicoes);
