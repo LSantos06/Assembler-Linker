@@ -13,7 +13,7 @@ const opTab tabela_instrucoes[14] = {
 const dirTab tabela_diretivas[7] = {
 	//-1 Indica q numero de operandos e tamanho
 	// eh variavel
-	{"SECTION", 1, 0}, {"SPACE", 0, 0},
+	{"SECTION", 1, 0}, {"SPACE", 0, 1},
 	{"CONST", 1, 1}, {"PUBLIC", 0, 0},
 	{"EXTERN", 0, 0}, {"BEGIN", 0, 0},
 	{"END", 0, 0}
@@ -56,22 +56,35 @@ int tamanho_instrucao(char *operacao){
 	return retorno;
 }
 
+
 int tamanho_diretiva(char *diretiva, char* operando){
 	int i, achou = 0, retorno = 0;
 	int op_space = 0;
 
 	//Se for space
-	if(strstr(diretiva, "SPACE")){
+	if(!strcmp(diretiva, "SPACE")){
 		//Se n for "\0", possui operando
 		if(strcmp(operando, "\0")){
 			op_space = atoi(operando);
 			if(op_space<=0){
 				printf("\nErro! Operando para diretiva SPACE invalido: numero menor ou igual a 0!\n");
-				return -1;
+				return -2;
 			}
 			return op_space;
 		}
 		//Se n possuir operando, aloca 1 espaco
+		else{
+			return 1;
+		}
+	}
+	//Se for const
+	if(!strcmp(diretiva, "CONST")){
+		//Se n tiver operando
+		if(!strcmp(operando, "\0")){
+			printf("\nErro Sintatico! Diretiva '%s' espera 1 argumento!\n", operando);
+			return -2;
+		}
+		//Se tiver operando, pula 1 casa
 		else{
 			return 1;
 		}
@@ -125,6 +138,21 @@ addrTab* busca_simbolo(addrTab* tabela, char* nome){
 	return NULL;
 }
 
+//Funcao que copia as posicoes dos simbolos para
+//a tabela definicoes ao final da passagem 1
+void copia_para_definicoes(){
+	addrTab* aux = tabela_definicoes;
+	addrTab* simbolo;
+
+	while(aux!=NULL){
+		simbolo = busca_simbolo(tabela_simbolos, aux->simbolo);
+		if(simbolo != NULL){
+			aux->posicao_memoria = simbolo->posicao_memoria;
+		}
+		aux = aux->prox;
+	}
+}
+
 int pertence_tabela(addrTab* tabela, char* nome){
 	addrTab *aux = busca_simbolo(tabela, nome);
 
@@ -156,7 +184,7 @@ int esta_vazia(addrTab* tabela){
 	return 0;
 }
 
-void insere_tabela(addrTab *tabela, char *nome, int posicao){
+void insere_tabela(addrTab *tabela, char *nome, int posicao, int externo){
 	if(pertence_tabela(tabela, nome)){
 		return;
 	}
@@ -165,6 +193,7 @@ void insere_tabela(addrTab *tabela, char *nome, int posicao){
 
 	strcpy(novo->simbolo, nome);
 	novo->posicao_memoria = posicao;
+	novo->externo = externo;
 	novo->prox = tabela->prox;
 
 	tabela->prox = novo;
@@ -186,7 +215,7 @@ void imprime_tabela(addrTab *tabela){
 
 	addrTab *aux = tabela->prox;
 	while(aux!=NULL){
-		printf("Simbolo = %s, Posicao = %d\n", aux->simbolo, aux->posicao_memoria);
+		printf("Simbolo = %s, Posicao = %d, Externo = %d\n", aux->simbolo, aux->posicao_memoria, aux->externo);
 
 		aux = aux->prox;
 	}

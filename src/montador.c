@@ -99,7 +99,7 @@ void seleciona_operacao(int argc, char* argv[]){
  * Verifica erros lexicos no programa
  * 		- contador_linha : para impressao de erro
 */
-void scanner(char *linha, int contador_linha){
+void scanner(char *linha, int contador_linha, char *delimitador){
 	if(linha == NULL){
 		return;
 	}
@@ -108,12 +108,12 @@ void scanner(char *linha, int contador_linha){
 	int erro = 0, i = 0;
 
 	//Espacao como caractere limitador
-	token = strtok(linha, " \t,\n");
+	token = strtok(linha, delimitador);
 
 	while(token!=NULL){
 		tokens_linha[i] = strdup(token);
-		//Se token comeca com numero e n vem depois de uma diretiva: ERROR -6
-		if(i>0 && token[0]>='0' && token[0]<='9' && (tamanho_diretiva(tokens_linha[i-1], "\0"))==-1){
+		//Se token comeca com numero e n vem depois de uma diretiva SPACE ou CONST: ERROR -6
+		if(i>0 && token[0]>='0' && token[0]<='9' && (strcmp(tokens_linha[i-1], "SPACE") && strcmp(tokens_linha[i-1], "CONST")) ){
 			printf("Erro lexico com token '%s': inicio com digito (linha %d)\n", token, contador_linha);
 			erro = 1;
 		}
@@ -124,6 +124,7 @@ void scanner(char *linha, int contador_linha){
 		}
 		if(i>8){
 			printf("\nExcedeu numero de tokens! (linha %d)\n", contador_linha);
+			erro = 1;
 			break;
 		}
 		// printf("<%s>\n", token);
@@ -426,7 +427,6 @@ FILE* pre_processamento(FILE *entrada, char *nome_arquivo_pre){
 }
 
 
-
 /* passagem1()
  *
  * Funcao responsavel pela 1 passagem do montador, recebendo um arquivo .pre ou .o
@@ -450,8 +450,8 @@ FILE* passagem1(FILE *pre_processado){
 	int contador_linha = 1;
 	int i = 0;
 	int pulo = 0;
-
-
+	int def_sec_text = 0, def_sec_data = 0;
+	int def_label;
 
 	//Cria as tabelas de simbolos e de definicoes vazias
 	inicializa_tabelas();
@@ -463,7 +463,10 @@ FILE* passagem1(FILE *pre_processado){
 	char *elemento;
 
 	while(!feof(pre_processado)){
-	    // Funcao fgets() lê até TLINHA caracteres ou até o '\n'
+			//Zera definicoes de diretivas, instrucoes e labels a cada linha
+			def_label = 0;
+
+			// Funcao fgets() lê até TLINHA caracteres ou até o '\n'
 	    instrucao = fgets(linha, TLINHA, pre_processado);
 
 	    if(instrucao==NULL){
@@ -473,11 +476,53 @@ FILE* passagem1(FILE *pre_processado){
 	    if(instrucao[0]!='\n' && instrucao[1]!='\0'){
 
 		    //Scanner coloca em tokens_linha um vetor com os tokens da linha
-		    scanner(instrucao, contador_linha);
+		    scanner(instrucao, contador_linha, " \t\n");
 
 		    //Analisar todos os tokens da linha
 		    for(i=0; tokens_linha[i]!="\0"; i++){
 		    	elemento = tokens_linha[i];
+					string_alta(elemento);
+
+					//Se for diretiva PUBLIC
+					if(!strcmp(elemento, "PUBLIC")){
+						string_alta(tokens_linha[i+1]);
+						//Insere token seguinte na tabela de definicoes
+						if(strcmp(tokens_linha[i+1], "\0")){
+							//Insere apenas o label
+							insere_tabela(tabela_definicoes, tokens_linha[i+1], 0, 0);
+						}
+						else{
+							printf("\nErro na linha %d: Diretiva '%s' com argumento invalido!", contador_linha, elemento);
+						}
+						break;
+					}
+					//Se for uma diretiva section
+					if(!strcmp(elemento, "SECTION")){
+							string_alta(tokens_linha[i+1]);
+							//Se token seguinte for TEXT
+							if (!strcmp(tokens_linha[i+1], "TEXT")) {
+								if(def_sec_data){
+									printf("\nErro na linha %d: 'SECTION DATA' antes de 'SECTION TEXT'", contador_linha);
+								}
+								if(def_sec_text){
+									printf("\nErro na linha %d: Múltiplas diretivas 'SECTION TEXT'", contador_linha);
+								}
+								def_sec_text = 1;
+								break;
+							}
+							else if (!strcmp(tokens_linha[i+1], "DATA")) {
+								if(def_sec_data){
+									printf("\nErro na linha %d: Múltiplas diretivas 'SECTION DATA'", contador_linha);
+								}
+								def_sec_data = 1;
+								break;
+							}
+							//Se proximo elemento n for DATA nem TEXT
+							else{
+								printf("\nErro na linha %d: Diretiva '%s' com argumento invalido!", contador_linha, elemento);
+								break;
+							}
+					}
 		    	//Se ṕossuir : eh label
 		    	if(strstr(elemento, ":")!=NULL){
 		    		//Verifica se : esta no fim do token
@@ -492,38 +537,60 @@ FILE* passagem1(FILE *pre_processado){
 		    				printf("\nErro na linha %d! Simbolo redefinido!\n", contador_linha);
 		    			}
 		    			else{
-		    				insere_tabela(tabela_simbolos, label, contador_posicao);
+								if(def_label){
+									printf("\nErro Sintático na linha %d! Múltiplos labels na mesma linha!\n", contador_linha);
+								}
+								else{
+									string_alta(tokens_linha[i+1]);
+									//Se possuir um extern, coloca 0 absoluto e indicacao de simbolo externo
+									if(!strcmp(tokens_linha[i+1], "EXTERN")){
+										insere_tabela(tabela_simbolos, label, 0, 1);
+									}
+									//Se n for externo
+									else{
+			    					insere_tabela(tabela_simbolos, label, contador_posicao, 0);
+									}
+									def_label = 1;
+								} //else def_label
 		    			} //else pertence_tabela()
 		    		} //else elemento :
 		    	} //if(strstr(elemento, ":")!=NULL)
-		    	//Se n for label, pode ser operacao ou diretiva
+		    	//Se n for label, SECTION ou PUBLIC, pode ser operacao ou diretiva
 		    	else{
 		    		//Se achou na tabela de instrucoes, retorna diferente de -1
 		    		pulo = tamanho_instrucao(elemento);
 		    		if(pulo!=-1){
 		    			contador_posicao += pulo + 1;
-		    			//Break pois n precisa olhar os operandos
-		    			break;
+							break;
 		    		}
 		    		//Se n tiver achado na Tab Instrucoes, procura na de diretivas
 		    		else{
 		    		pulo = tamanho_diretiva(elemento, tokens_linha[i+1]);
-		    		//Se tiver achado na tabela de diretivas
-			    		if(pulo!= -1){
+		    		//Se tiver achado na tabela de diretivas ou se n tiver erros em operandos
+			    		if(pulo > -1){
 			    			contador_posicao += pulo;
-			    			break;
+								break;
 			    		}
 			    	//Se n tiver achado em nenhuma das 2 tabelas, erro
-			    		else{
+			    		else {
+								//Pulo pode ser -2, de um operando de diretiva invalido
+								if(pulo == -1){
 			    			printf("\nErro na linha %d! Operacao nao identificada\n", contador_linha);
+							}
 			    			break;
-			    		} // else (pulo!=-1) (diretiva)
+			    		} // else (pulo > -1) (diretiva)
 		    		} //else (pulo!=-1) (instrucao)
 		    	} //else (strstr(elemento, ";"))
 		    } //for
 		} // if instrucao nao eh nula
 		contador_linha = contador_linha + 1;
   } // while (!feof)
+	if(!def_sec_text){
+		printf("\nErro! 'SECTION TEXT' faltando no programa\n");
+	}
+	//Apos o fim do programa, copia os valores da tabela de simbolos
+	//para a tabela de definicoes
+	copia_para_definicoes();
 
   fclose(pre_processado);
 } //passagem1()

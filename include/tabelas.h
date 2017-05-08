@@ -35,6 +35,7 @@ extern const dirTab tabela_diretivas[7];
 typedef struct addr{
 	char simbolo[50];
 	int posicao_memoria;
+	int externo;
 	struct addr* prox;
 } addrTab;
 
@@ -52,8 +53,9 @@ void inicializa_tabelas();
 int busca_posicao_memoria(addrTab* tabela, char* nome);
 int esta_vazia(addrTab* tabela);
 int pertence_tabela(addrTab* tabela, char* nome);
-void insere_tabela(addrTab *tabela, char *nome, int posicao);
+void insere_tabela(addrTab *tabela, char *nome, int posicao, int externo);
 void imprime_tabela(addrTab *tabela);
+void copia_para_definicoes();
 
 /// LIGADOR
 
