@@ -22,8 +22,9 @@ void scanner(char *linha, int contador_linha, char *delimitador);
 FILE* pre_processamento(FILE *entrada, char* nome_arquivo_pre);
 // Realiza a montagem sobre um arquivo .asm ou .pre (-o)
 FILE* passagem1(FILE *pre_processado);
-FILE* passagem2(FILE *arq_intermediario);
+FILE* passagem2(FILE *arq_intermediario, char* nome_arquivo_obj);
 
 void imprime_tokens();
+int checa_tipo_instrucao(int i, int linha);
 
 #endif

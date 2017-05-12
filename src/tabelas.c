@@ -148,6 +148,7 @@ void copia_para_definicoes(){
 		simbolo = busca_simbolo(tabela_simbolos, aux->simbolo);
 		if(simbolo != NULL){
 			aux->posicao_memoria = simbolo->posicao_memoria;
+			aux->data = simbolo->data;
 		}
 		aux = aux->prox;
 	}
@@ -184,7 +185,17 @@ int esta_vazia(addrTab* tabela){
 	return 0;
 }
 
-void insere_tabela(addrTab *tabela, char *nome, int posicao, int externo){
+int eh_dado(char*simbolo){
+	addrTab *aux = busca_simbolo(tabela_simbolos, simbolo);
+
+	if(aux == NULL){
+		return -1;
+	}
+
+	return aux->data;
+}
+
+void insere_tabela(addrTab *tabela, char *nome, int posicao, int externo, int data){
 	if(pertence_tabela(tabela, nome)){
 		return;
 	}
@@ -194,6 +205,7 @@ void insere_tabela(addrTab *tabela, char *nome, int posicao, int externo){
 	strcpy(novo->simbolo, nome);
 	novo->posicao_memoria = posicao;
 	novo->externo = externo;
+	novo->data = data;
 	novo->prox = tabela->prox;
 
 	tabela->prox = novo;
@@ -215,7 +227,8 @@ void imprime_tabela(addrTab *tabela){
 
 	addrTab *aux = tabela->prox;
 	while(aux!=NULL){
-		printf("Simbolo = %s, Posicao = %d, Externo = %d\n", aux->simbolo, aux->posicao_memoria, aux->externo);
+		printf("Simbolo = %s, Posicao = %d, Externo = %d, Dado = %d\n",
+		aux->simbolo, aux->posicao_memoria, aux->externo, aux->data);
 
 		aux = aux->prox;
 	}
