@@ -6,8 +6,8 @@ a ser implementado ser ́a um Macro-Assembler da linguagem hipotética vista em 
 de aula.
 
 ### Integrantes do grupo
-Davi Rabbouni - 15/
-Lucas Santos - 14/0151010
+* Davi Rabbouni - 15/
+* Lucas Santos - 14/0151010
 
 ### Instruções de compilação
 A compilação do projeto é feita por meio de um **makefile**, a seguir seguem as opções disponíveis para o mesmo:
@@ -21,7 +21,7 @@ make clean
 make preproc file_name=
   # Realiza o pre-processamento de um arquivo .asm 
   # Possui o argumento:
-  #   file_name, que deve ser o nome do arquivo .asm, sem a extensão  
+  #   file_name, que deve ser o nome do arquivo .asm, sem extensão  
   
 make valpreproc file_name=
   # Realiza o pre-processamento de um arquivo .asm, com análise de memory leak por meio do valgrind
@@ -29,7 +29,7 @@ make valpreproc file_name=
 make monta_asm file_name=
   # Realiza a montagem de um arquivo .asm 
   # Possui o argumento:
-  #   file_name, que deve ser o nome do arquivo .asm, sem a extensão  
+  #   file_name, que deve ser o nome do arquivo .asm, sem extensão  
   
 make valmonta_asm file_name=
   # Realiza a montagem de um arquivo .asm, com análise de memory leak por meio do valgrind
@@ -37,7 +37,7 @@ make valmonta_asm file_name=
 make monta_pre file_name=
   # Realiza a montagem de um arquivo .pre 
   # Possui o argumento:
-  #   file_name, que deve ser o nome do arquivo .pre, sem a extensão
+  #   file_name, que deve ser o nome do arquivo .pre, sem extensão
   
 make valmonta_pre file_name=
   # Realiza a montagem de um arquivo .pre, com análise de memory leak por meio do valgrind
