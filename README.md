@@ -6,7 +6,7 @@ a ser implementado ser ́a um Macro-Assembler da linguagem hipotética vista em 
 de aula.
 
 ### Integrantes do grupo
-* Davi Rabbouni - 15/
+* Davi Rabbouni - 15/0033010
 * Lucas Santos - 14/0151010
 
 ### Instruções de compilação
