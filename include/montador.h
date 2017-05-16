@@ -25,6 +25,6 @@ FILE* passagem1(FILE *pre_processado);
 FILE* passagem2(FILE *arq_intermediario, char* nome_arquivo_obj);
 
 void imprime_tokens();
-int checa_tipo_instrucao(int i, int linha);
+int checa_tipo_instrucao(FILE* obj, int i, int contador_linha, int *contador_posicao);
 
 #endif

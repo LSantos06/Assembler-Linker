@@ -650,9 +650,16 @@ void imprime_tokens(){
 //		se n achou nd, operacao n identificada
 //	contador_linha++
 FILE* passagem2(FILE *arq_intermediario, char* nome_arquivo_obj){
-		int contador_linha = 1, contador_posicao = 0;
+		int contador_linha = 1;
+		//contador_posicao eh ponteiro para ser passado para funcao checa_tipo()
+		int* cont_pos_ptr;
+		int contador_posicao = 0;
+		cont_pos_ptr = &contador_posicao;
+
 		int i, checa_tipo;
 		int tamanho;
+		//Flag que indica se ja houve label na linha
+		int def_label = 0;
 		char* arquivo_saida;
 
 		char *instrucao;
@@ -664,6 +671,10 @@ FILE* passagem2(FILE *arq_intermediario, char* nome_arquivo_obj){
 		//Abre arquivo pra escrita
 		obj = fopen(arquivo_saida, "w");
 
+		//1- Escreve primeiro o codigo
+		//2- rewind
+		//3- Tabelas e mapa de bits
+		fprintf(obj, "CODE\n");
 		while(!feof(arq_intermediario)){
 			// Funcao fgets() lê até TLINHA caracteres ou até o '\n'
 			instrucao = fgets(linha, TLINHA, arq_intermediario);
@@ -673,16 +684,23 @@ FILE* passagem2(FILE *arq_intermediario, char* nome_arquivo_obj){
 	    }
 	    //Se a linha nao for nula
 	    if(instrucao[0]!='\n' && instrucao[1]!='\0'){
-
+				//Como mudou de linha, zera definicao do label
+				def_label = 0;
 		    //Scanner coloca em tokens_linha um vetor com os tokens da linha
-		    scanner(instrucao, contador_linha, " \t\n");
+		    scanner(instrucao, contador_linha, " ,\t\n");
 
 		    //Analisar todos os tokens da linha
 		    for(i=0; tokens_linha[i]!="\0"; i++){
 					string_alta(tokens_linha[i]);
 					//Se for label, ignora
 					if(strstr(tokens_linha[i], ":")){
-						continue;
+							if(def_label){
+								printf("Erro na linha %d: Label ja definido na linha\n", contador_linha);
+							}
+							else{
+								def_label = 1;
+							}
+							continue;
 					}
 
 					//Se for instrucao, verifica tipos com o tamanho da operacao
@@ -690,10 +708,10 @@ FILE* passagem2(FILE *arq_intermediario, char* nome_arquivo_obj){
 					if(tamanho!=-1){
 						contador_posicao += tamanho;
 
-						checa_tipo = checa_tipo_instrucao(i, contador_linha);
-						//checa_tipo_instrucao retorna 0 se houve erro
+						checa_tipo = checa_tipo_instrucao(obj, i, contador_linha, cont_pos_ptr);
+						//checa_tipo_instrucao retorna 0 se houve
 						if(!checa_tipo){
-							//ERRO
+							//(TODO) Tratar ERRO
 						}
 						//Soma indice do vetor com o checa_tipo, para n ler
 						//elementos da lista 2 vezes
@@ -702,30 +720,41 @@ FILE* passagem2(FILE *arq_intermediario, char* nome_arquivo_obj){
 						} //else
 					} //if INSTRUCAO
 
-				} //For
+				} //For (!fim da linha)
 			} //Se a linha n for nula
 
 
 
 			contador_linha++;
-		}
+		} //while (!feof)
 }
 
 //Funcao de checagem de tipos das instrucoes;
-// Recebe indice atual da posicao na linha e numero da linha (para msg de erro)
+// Recebe indice atual da posicao na linha, numero da linha (para msg de erro)
+//e contador posicao (para colocar na tabela de uso)
 //Se os tipos estiverem
 //certos, escreve no arquivo (TODO)
 //Caso contrario, retorna erro
 //Retorna posicao do vetor tokens_linha apos a operacao e seus operandos
-int checa_tipo_instrucao(int i, int contador_linha){
+int checa_tipo_instrucao(FILE* obj, int i, int contador_linha, int *contador_posicao){
 	char *elemento = tokens_linha[i];
 	int indice_retorno, erro = 0;
+
+	//Coloca em Upper Case para fazer comparacao
+	string_alta(tokens_linha[i+1]);
+	string_alta(tokens_linha[i+2]);
 
 	//Se for instrucao de desvio
 	if(!strcmp(tokens_linha[i], "JMP") || !strcmp(tokens_linha[i], "JMPN")
 	|| !strcmp(tokens_linha[i], "JMPP") || !strcmp(tokens_linha[i], "JMPZ")){
+		//Se for um simbolo externo, coloca na tabela de uso
+		if(eh_externo(tokens_linha[i+1])){
+			//insere(tabela, instrucao, posicao, externo, eh_dado?)
+			insere_tabela(tabela_uso, tokens_linha[i+1], *contador_posicao, 0, 0);
+			*contador_posicao++;
+		}
 		//Se for dado
-		if(eh_dado(tokens_linha[i+1])==1){
+		else if(eh_dado(tokens_linha[i+1])==1){
 			printf("Erro Semantico na linha %d: Pulo para rotulo invalido", contador_linha);
 			erro = 1;
 		}
@@ -734,43 +763,66 @@ int checa_tipo_instrucao(int i, int contador_linha){
 			printf("Erro Sintatico na linha %d: Argumento invalido", contador_linha);
 			erro = 1;
 		}
-		else{
-			//(TODO) imprime opcode e operador no arquivo
+		//Se argumento for valido, imprime
+		if(!erro){
+			//imprime opcode e operador no arquivo
+			fprintf(obj, "%d %d ", opcode(tokens_linha[i]), busca_posicao_memoria(tabela_simbolos, tokens_linha[i+1]));
 		}
 	}
 	//Se for copy
 	else if(!strcmp(tokens_linha[i], "COPY")){
-		//Se 1 argumento n for dado
-		if(eh_dado(tokens_linha[i+1])!=1){
-			printf("Erro Sintatico na linha %d: Argumento 1 de 'COPY' invalido", contador_linha);
-			erro = 1;
-		}
-		//Se 2 argumento n for dado
-		if(eh_dado(tokens_linha[i+2])!=1){
-			printf("Erro Sintatico na linha %d: Argumento 2 de 'COPY' invalido", contador_linha);
-			erro = 1;
-		}
-		//Se os 2 forem dados
-		if(eh_dado(tokens_linha[i+1])==1 && eh_dado(tokens_linha[i+2])==1){
-			//(TODO) Imprime opcode + posicao dos operandos
-		}
+			//Se for um simbolo externo, coloca na tabela de uso
+			if(eh_externo(tokens_linha[i+1])){
+				//insere(tabela, instrucao, posicao, externo, eh_dado?)
+				insere_tabela(tabela_uso, tokens_linha[i+1], *contador_posicao, 0, 0);
+				*contador_posicao++;
+			}
+			//Se 1 argumento n for dado
+			else if(eh_dado(tokens_linha[i+1])!=1){
+				printf("Erro Sintatico na linha %d: Argumento 1 de 'COPY' invalido", contador_linha);
+				erro = 1;
+			}
+			//Se for um simbolo externo, coloca na tabela de uso
+			if(eh_externo(tokens_linha[i+2])){
+				//insere(tabela, instrucao, posicao, externo, eh_dado?)
+				insere_tabela(tabela_uso, tokens_linha[i+2], *contador_posicao, 0, 0);
+				*contador_posicao++;
+			}
+			//Se 2 argumento n for dado
+			else if(eh_dado(tokens_linha[i+2])!=1){
+				printf("Erro Sintatico na linha %d: Argumento 2 de 'COPY' invalido", contador_linha);
+				erro = 1;
+			}
+			//Se os 2 forem argumentos validos
+			if(!erro){
+				//Imprime opcode + posicao dos operandos
+				fprintf(obj, "%d %d %d ", opcode(tokens_linha[i]), busca_posicao_memoria(tabela_simbolos, tokens_linha[i+1]),
+				busca_posicao_memoria(tabela_simbolos, tokens_linha[i+2]));
+			}
 	} //else if
 	else if(!strcmp(tokens_linha[i], "STOP")){
-		//Se n for ultimo token da linha
-		if(strcmp(tokens_linha[i+1], "\0")){
-			printf("Erro Sintatico na linha %d: 'STOP' n recebe argumentos", contador_linha);
-		}
+			//Se n for ultimo token da linha
+			if(strcmp(tokens_linha[i+1], "\0")){
+				printf("Erro Sintatico na linha %d: 'STOP' n recebe argumentos", contador_linha);
+			}
 	}
 	//Se n for nem desvio, copy ou stop, vai ter 1 operando da area de dados
 	else{
-		if(eh_dado(tokens_linha[i+1])!=1){
-			printf("Erro Sintatico na linha %d: Argumento invalido!", contador_linha);
-			erro = 1;
-		} //if
-		//Se for dado
-		else{
-			// (TODO) Imprime opcode + posicao dos operandos
-		} //else eh_dado()
+			//Se for um simbolo externo, coloca na tabela de uso
+			if(eh_externo(tokens_linha[i+1])){
+				//insere(tabela, instrucao, posicao, externo, eh_dado?)
+				insere_tabela(tabela_uso, tokens_linha[i+1], *contador_posicao, 0, 0);
+				*contador_posicao++;
+			}
+			else if(eh_dado(tokens_linha[i+1])!=1){
+				printf("Erro Sintatico na linha %d: Argumento invalido!", contador_linha);
+				erro = 1;
+			} //if
+			//Se for valido
+			if(!erro){
+				// Imprime opcode + posicao dos operandos
+				fprintf(obj, "%d %d ", opcode(tokens_linha[i]), busca_posicao_memoria(tabela_simbolos, tokens_linha[i+1]));
+			} //if (!erro)
 	} //else if(!COPY & !DESVIO)
 
 	if(erro){

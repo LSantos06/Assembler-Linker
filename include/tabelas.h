@@ -42,22 +42,28 @@ typedef struct addr{
 
 extern addrTab* tabela_simbolos;
 extern addrTab* tabela_definicoes;
+//Tabela de uso usara apenas o simbolo + posicao_memoria
+extern addrTab* tabela_uso;
 
 
-//Funcoes de manipulacao das tabelas
+/*********** Funcoes de manipulacao das tabelas ***********/
 void imprime_instrucoes_diretivas();
+//Funcao de encapsulamento de instrucoes e diretivas
 int tamanho_instrucao(char *operacao);
+int opcode(char *simbolo);
 int tamanho_diretiva(char *diretiva, char* operando);
 
-//Tabela de simbolos e de definicoes
+/*********** Tabela de simbolos e de definicoes ***********/
 void inicializa_tabelas();
-int busca_posicao_memoria(addrTab* tabela, char* nome);
 int esta_vazia(addrTab* tabela);
 int pertence_tabela(addrTab* tabela, char* nome);
 void insere_tabela(addrTab *tabela, char *nome, int posicao, int externo, int data);
-int eh_dado(char*simbolo);
 void imprime_tabela(addrTab *tabela);
 void copia_para_definicoes();
+//Funcoes de encapsulamento das tabelas
+int busca_posicao_memoria(addrTab* tabela, char* nome);
+int eh_dado(char*simbolo);
+int eh_externo(char *simbolo);
 
 /// LIGADOR
 

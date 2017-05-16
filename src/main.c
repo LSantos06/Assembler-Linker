@@ -27,6 +27,8 @@ void testes(){
 	imprime_tabela(tabela_simbolos);
 	printf("\nTabela definicoes:\n");
 	imprime_tabela(tabela_definicoes);
+	printf("\nTabela Uso:\n");
+	imprime_tabela(tabela_uso);
 
 	//teste_tabelas();
 	//teste_scanner();

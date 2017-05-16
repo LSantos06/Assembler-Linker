@@ -22,6 +22,7 @@ const dirTab tabela_diretivas[7] = {
 
 addrTab* tabela_simbolos;
 addrTab* tabela_definicoes;
+addrTab* tabela_uso;
 
 void imprime_instrucoes_diretivas(){
 	int i = 0;
@@ -45,6 +46,25 @@ int tamanho_instrucao(char *operacao){
 		if(!(strcmp(operacao, tabela_instrucoes[i].nome))){
 			achou = 1;
 			retorno = tabela_instrucoes[i].ops;
+		} // if
+	} // for
+
+	//Se nao achou instrucao
+	if(achou == 0){
+		return -1;
+	}
+
+	return retorno;
+}
+
+int opcode(char *simbolo){
+	int i, achou = 0, retorno = 0;
+
+	for (i = 0; i<14; i++){
+		//Se achou a instrucao
+		if(!(strcmp(simbolo, tabela_instrucoes[i].nome))){
+			achou = 1;
+			retorno = tabela_instrucoes[i].opcode;
 		} // if
 	} // for
 
@@ -109,13 +129,16 @@ int tamanho_diretiva(char *diretiva, char* operando){
 }
 
 
-//Cria uma tabela vazia
+//Cria a TS, TD e Tab de Uso
 void inicializa_tabelas(){
 	tabela_simbolos = (addrTab *) malloc(sizeof(addrTab));
 	tabela_simbolos->prox = NULL;
 
 	tabela_definicoes = (addrTab *) malloc(sizeof(addrTab));
 	tabela_definicoes->prox = NULL;
+
+	tabela_uso = (addrTab *) malloc(sizeof(addrTab));
+	tabela_uso->prox = NULL;
 }
 
 /*addrTab* cria_tabela(){
@@ -193,6 +216,16 @@ int eh_dado(char*simbolo){
 	}
 
 	return aux->data;
+}
+
+int eh_externo(char *simbolo){
+	addrTab *aux = busca_simbolo(tabela_simbolos, simbolo);
+
+	if(aux == NULL){
+		return 0;
+	}
+
+	return aux->externo;
 }
 
 void insere_tabela(addrTab *tabela, char *nome, int posicao, int externo, int data){
