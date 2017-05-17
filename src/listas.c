@@ -20,34 +20,21 @@ void insere_elemento(lista_t *lista, char *id, char *valor){
   lista_t *novo;
   novo = (lista_t *) malloc (sizeof (lista_t));
 
-	if(valor[strlen(valor)-1] < 30
+	// Tira \n
+	if(id[strlen(id)-1] < 48
+	|| id[strlen(id)-1] > 122){
+		 id[strlen(id)-1] = '\0';
+	}
+	if(valor[strlen(valor)-1] < 48
 	|| valor[strlen(valor)-1] > 122){
 		 valor[strlen(valor)-1] = '\0';
 	}
 
-	lista_t *busca;
+	strcpy(novo->id,id);
+	strcpy(novo->valor,valor);
+	novo->proximo = lista->proximo;
 
-	busca = busca_elemento(lista, id);
-
-	if(valor[strlen(valor)-1] < 30
-	|| valor[strlen(valor)-1] > 122){
-		 valor[strlen(valor)-1] = '\0';
-	}
-
-	// Elemento ja esta na lista
-	// if(busca!=NULL){
-	// 	strcat(busca->valor, " ");
-	// 	strcat(busca->valor, valor);
-	// }
-	// // Elemento ainda nao esta na lista
-	// else{
-		strcpy(novo->id,id);
-		strcpy(novo->valor,valor);
-		novo->proximo = lista->proximo;
-
-		lista->proximo = novo;
-	// }
-
+	lista->proximo = novo;
 }
 
 // Insere uma lista em outra
@@ -69,6 +56,12 @@ lista_t * insere_lista(lista_t *lista, lista_t *lista2){
 // Busca um id na lista e retorna elemento
 lista_t * busca_elemento(lista_t *lista, char *id_buscado){
   lista_t *aux = lista;
+
+	// Tira \n
+	if(id_buscado[strlen(id_buscado)-1] < 48
+	|| id_buscado[strlen(id_buscado)-1] > 122){
+		 id_buscado[strlen(id_buscado)-1] = '\0';
+	}
 
   while (aux != NULL){
 		// Se o id buscado esta na lista, retorna o EQU encontrado

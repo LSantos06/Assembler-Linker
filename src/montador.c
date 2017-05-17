@@ -235,7 +235,7 @@ FILE* pre_processamento(FILE *entrada, char *nome_arquivo_pre){
 
       // 1 token, que pode ser um "IF" ou qualquer outra coisa
       // Funcao strtok() corta uma string em tokens a partir de um separador
-      token = strtok(instrucao, " ");
+      token = strtok(instrucao, " 	");
 
 			// Passando o token para caixa alta, para fins de comparacao
 			string_alta(token);
@@ -250,10 +250,10 @@ FILE* pre_processamento(FILE *entrada, char *nome_arquivo_pre){
 
         // Pega o 2 token para decidir se a linha continua ou eh desconsiderada
         if(token!=NULL){
-          token = strtok(NULL, " ");
+          token = strtok(NULL, "	 ");
           //printf("IF %s\n", token);
 
-					//exibe(lista_equs);
+					//exibe_lista(lista_equs);
 
           // Busca o argumento do IF na lista de EQUs
           resultado_busca = busca_elemento(lista_equs, token);
@@ -338,7 +338,7 @@ FILE* pre_processamento(FILE *entrada, char *nome_arquivo_pre){
 
         // Pega o 2 token para ver se eh um EQU ou alguma label que esta na lista de EQUS
         if(token!=NULL){
-          token = strtok(NULL, " ");
+          token = strtok(NULL, "	 ");
           //printf("OUTRO %s", token);
 
 					// Passando o token para caixa alta, para fins de comparacao
@@ -350,7 +350,7 @@ FILE* pre_processamento(FILE *entrada, char *nome_arquivo_pre){
 					// INSTRUCAO OP, Eh uma instrucao com operando na lista de EQUS
 					if(resultado_busca != NULL){
 						// Separa o id associado da escrita
-						aux_escrita = strtok(escrita, " ");
+						aux_escrita = strtok(escrita, " 	");
 
 						// Acrescenta o valor associado na escrita
 						strcat(aux_escrita, " ");
@@ -370,7 +370,7 @@ FILE* pre_processamento(FILE *entrada, char *nome_arquivo_pre){
 
             // Pega o 3 token, que eh o operando de EQU
             if(token!=NULL){
-              token = strtok(NULL, " ");
+              token = strtok(NULL, "	 ");
 
 							// Se o operando do EQU nao for um numero
 							if(*token < 48 ||
@@ -395,7 +395,7 @@ FILE* pre_processamento(FILE *entrada, char *nome_arquivo_pre){
 
 						// Pega o 3 token, se ele nao for nulo, eh uma diretiva
 						if(token!=NULL){
-							token = strtok(NULL, " ");
+							token = strtok(NULL, "	 ");
 
 							// LABEL: DIRETIVA OP, diretivas podem conter operandos com elemento terminal
 							if(token!=NULL){
@@ -405,8 +405,8 @@ FILE* pre_processamento(FILE *entrada, char *nome_arquivo_pre){
 								// Operando esta na lista de EQUS
 								if(resultado_busca != NULL){
 									// Separa o id associado da escrita
-									aux_escrita = strtok(escrita, " ");
-									aux_escrita2 = strtok(NULL, " ");
+									aux_escrita = strtok(escrita, " 	");
+									aux_escrita2 = strtok(NULL, " 	");
 									strcpy(aux_escrita_diretiva, aux_escrita2);
 
 									// Acrescenta o valor associado na escrita
