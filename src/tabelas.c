@@ -77,40 +77,11 @@ int opcode(char *simbolo){
 }
 
 
-int tamanho_diretiva(char *diretiva, char* operando){
+int tamanho_diretiva(char *diretiva){
 	int i, achou = 0, retorno = 0;
 	int op_space = 0;
 
-	//Se for space
-	if(!strcmp(diretiva, "SPACE")){
-		//Se n for "\0", possui operando
-		if(strcmp(operando, "\0")){
-			op_space = atoi(operando);
-			if(op_space<=0){
-				printf("\nErro! Operando para diretiva SPACE invalido: numero menor ou igual a 0!\n");
-				return -2;
-			}
-			return op_space;
-		}
-		//Se n possuir operando, aloca 1 espaco
-		else{
-			return 1;
-		}
-	}
-	//Se for const
-	if(!strcmp(diretiva, "CONST")){
-		//Se n tiver operando
-		if(!strcmp(operando, "\0")){
-			printf("\nErro Sintatico! Diretiva '%s' espera 1 argumento!\n", operando);
-			return -2;
-		}
-		//Se tiver operando, pula 1 casa
-		else{
-			return 1;
-		}
-	}
 
-	//Se n for space
 	for (i = 0; i<7; i++){
 		//Se achou a instrucao
 		if(!(strcmp(diretiva, tabela_diretivas[i].nome))){
@@ -229,9 +200,10 @@ int eh_externo(char *simbolo){
 }
 
 void insere_tabela(addrTab *tabela, char *nome, int posicao, int externo, int data){
-	if(pertence_tabela(tabela, nome)){
-		return;
-	}
+	//Tabela de uso pode ter mais de um label repetido
+	if(pertence_tabela(tabela, nome) && tabela !=tabela_uso){
+	 	return;
+		}
 
 	addrTab *novo = (addrTab *) malloc(sizeof(addrTab));
 

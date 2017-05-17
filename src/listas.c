@@ -1,5 +1,7 @@
 #include "listas.h"
 
+lista_t *mapa_bits;
+
 // Inicializa lista
 void inicializa_lista(lista_t *lista){
 	lista->proximo = NULL;

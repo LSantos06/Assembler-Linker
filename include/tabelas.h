@@ -51,7 +51,7 @@ void imprime_instrucoes_diretivas();
 //Funcao de encapsulamento de instrucoes e diretivas
 int tamanho_instrucao(char *operacao);
 int opcode(char *simbolo);
-int tamanho_diretiva(char *diretiva, char* operando);
+int tamanho_diretiva(char *diretiva);
 
 /*********** Tabela de simbolos e de definicoes ***********/
 void inicializa_tabelas();

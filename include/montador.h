@@ -26,5 +26,6 @@ FILE* passagem2(FILE *arq_intermediario, char* nome_arquivo_obj);
 
 void imprime_tokens();
 int checa_tipo_instrucao(FILE* obj, int i, int contador_linha, int *contador_posicao);
+int checa_tipo_diretiva(FILE* obj, int i, int contador_linha, int *contador_posicao);
 
 #endif

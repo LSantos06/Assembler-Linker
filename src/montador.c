@@ -131,7 +131,7 @@ void scanner(char *linha, int contador_linha, char *delimitador){
 		// printf("<%s>\n", token);
 		i++;
 		//Avanca pro proximo token
-		token = strtok(NULL, " \t,\n");
+		token = strtok(NULL, delimitador);
 	}
 	tokens_linha[i] = "\0";
 
@@ -453,6 +453,7 @@ FILE* passagem1(FILE *pre_processado){
 	int pulo = 0;
 	int def_sec_text = 0, def_sec_data = 0;
 	int def_label;
+	int op_space;
 
 	//Cria as tabelas de simbolos e de definicoes vazias
 	inicializa_tabelas();
@@ -558,6 +559,7 @@ FILE* passagem1(FILE *pre_processado){
 		    			} //else pertence_tabela()
 		    		} //else elemento :
 		    	} //if(strstr(elemento, ":")!=NULL)
+
 		    	//Se n for label, SECTION ou PUBLIC, pode ser operacao ou diretiva
 		    	else{
 		    		//Se achou na tabela de instrucoes, retorna diferente de -1
@@ -568,12 +570,41 @@ FILE* passagem1(FILE *pre_processado){
 		    		}
 		    		//Se n tiver achado na Tab Instrucoes, procura na de diretivas
 		    		else{
-		    		pulo = tamanho_diretiva(elemento, tokens_linha[i+1]);
-		    		//Se tiver achado na tabela de diretivas ou se n tiver erros em operandos
-			    		if(pulo > -1){
-			    			contador_posicao += pulo;
-								break;
-			    		}
+		    		pulo = tamanho_diretiva(elemento);
+		    		//Se tiver achado na tabela de diretivas
+			    		if(pulo != -1){
+									string_alta(tokens_linha[i+1]);
+									//Se for space
+									if(!strcmp(elemento, "SPACE")){
+										//Se n for "\0", possui operando
+										if(strcmp(tokens_linha[i+1], "\0")){
+												op_space = atoi(tokens_linha[i+1]);
+												if(op_space<=0){
+													printf("\nErro! Operando para diretiva SPACE invalido: numero menor ou igual a 0!\n");
+												}	//if op_space <=0
+												else{
+													contador_posicao += op_space;
+												} //else
+										} // if stcmp(tokens_linha[i+1])
+
+										//Se n possuir operando, aloca 1 espaco
+										else{
+											contador_posicao++;
+										}
+									} //if SPACE
+									//Se for const
+									if(!strcmp(elemento, "CONST")){
+										//Se n tiver operando
+										if(!strcmp(tokens_linha[i+1], "\0")){
+											printf("\nErro Sintatico! Diretiva '%s' espera 1 argumento!\n", elemento);
+										}
+										//Se tiver operando, pula 1 casa
+										else{
+											contador_posicao++;
+										}
+									}
+									break;
+			    		} //Se for Diretiva
 			    	//Se n tiver achado em nenhuma das 2 tabelas, erro
 			    		else {
 								//Pulo pode ser -2, de um operando de diretiva invalido
@@ -656,25 +687,39 @@ FILE* passagem2(FILE *arq_intermediario, char* nome_arquivo_obj){
 		int contador_posicao = 0;
 		cont_pos_ptr = &contador_posicao;
 
-		int i, checa_tipo;
+		int i, checa_instrucao, checa_diretiva;
 		int tamanho;
 		//Flag que indica se ja houve label na linha
 		int def_label = 0;
+		//Flags indicando se houve Begin e End no codigo
+		int def_begin = 0;
+		int def_end = 0;
 		char* arquivo_saida;
 
 		char *instrucao;
 		char linha[TLINHA];
 		char* prox_elemento;
+		char *arquivo_provisorio_nome = "arquivo_provisorio";
+		FILE* obj_provisorio;
 		FILE* obj;
 
+		//Inicia mapa de bits pra mandar enderecos de relocacao
+		//Mapa bits vai conter dados invertidos, pra passar pro mapa provisorio dps
+		lista_t *mapa_provisorio = (lista_t*)  malloc(sizeof(lista_t));
+		inicializa_lista(mapa_provisorio);
+		mapa_bits = (lista_t *) malloc(sizeof(lista_t));
+		inicializa_lista(mapa_bits);
+
 		arquivo_saida = strcat(nome_arquivo_obj, ".o");
-		//Abre arquivo pra escrita
 		obj = fopen(arquivo_saida, "w");
+		//Abre arquivo pra escrita
+		obj_provisorio = fopen(arquivo_provisorio_nome, "w");
 
 		//1- Escreve primeiro o codigo
 		//2- rewind
 		//3- Tabelas e mapa de bits
-		fprintf(obj, "CODE\n");
+		fprintf(obj_provisorio, "CODE\n");
+
 		while(!feof(arq_intermediario)){
 			// Funcao fgets() lê até TLINHA caracteres ou até o '\n'
 			instrucao = fgets(linha, TLINHA, arq_intermediario);
@@ -689,9 +734,32 @@ FILE* passagem2(FILE *arq_intermediario, char* nome_arquivo_obj){
 		    //Scanner coloca em tokens_linha um vetor com os tokens da linha
 		    scanner(instrucao, contador_linha, " ,\t\n");
 
+
 		    //Analisar todos os tokens da linha
 		    for(i=0; tokens_linha[i]!="\0"; i++){
 					string_alta(tokens_linha[i]);
+					//Se for BEGIN
+					if(!strcmp(tokens_linha[i], "BEGIN")){
+						if(def_begin){
+							printf("Erro! Multiplas diretivas BEGIN no codigo!\n");
+						}
+						if(def_end){
+							printf("Erro! Diretiva END declarada antes de BEGIN");
+						}
+						def_begin = 1;
+						continue;
+					}
+					//Se for END
+					if(!strcmp(tokens_linha[i], "END")){
+						if(!def_begin){
+							printf("Erro! Diretiva END sem um BEGIN correspondente!\n");
+						}
+						if(def_end){
+							printf("Erro! Multiplas diretivas END no codigo!\n");
+						}
+						def_end = 1;
+						continue;
+					}
 					//Se for label, ignora
 					if(strstr(tokens_linha[i], ":")){
 							if(def_label){
@@ -706,19 +774,34 @@ FILE* passagem2(FILE *arq_intermediario, char* nome_arquivo_obj){
 					//Se for instrucao, verifica tipos com o tamanho da operacao
 					tamanho = tamanho_instrucao(tokens_linha[i]);
 					if(tamanho!=-1){
-						contador_posicao += tamanho;
+						*cont_pos_ptr = *cont_pos_ptr + tamanho;
 
-						checa_tipo = checa_tipo_instrucao(obj, i, contador_linha, cont_pos_ptr);
-						//checa_tipo_instrucao retorna 0 se houve
-						if(!checa_tipo){
+						checa_instrucao = checa_tipo_instrucao(obj_provisorio, i, contador_linha, cont_pos_ptr);
+						//checa_tipo_instrucao retorna 0 se houve erro
+						if(!checa_instrucao){
 							//(TODO) Tratar ERRO
 						}
 						//Soma indice do vetor com o checa_tipo, para n ler
 						//elementos da lista 2 vezes
 						else{
-							i += checa_tipo;
+							i += checa_instrucao;
 						} //else
+						continue;
 					} //if INSTRUCAO
+					//Se for diretiva (sem ser BEGIN ou END), retorna >= 0
+					tamanho = tamanho_diretiva(tokens_linha[i]);
+					if(tamanho >= 0){
+						//Incrementa 1 se for CONST, variavel se for SPACE, 0 Caso Contrario
+						checa_diretiva = checa_tipo_diretiva(obj_provisorio, i, contador_linha, cont_pos_ptr);
+						//Se retornar -1, houve erro
+						if(checa_diretiva == -1){
+							//TODO Tratar ERro
+						}
+						else{
+							i += checa_diretiva;
+						}
+						continue;
+					} //if Diretiva
 
 				} //For (!fim da linha)
 			} //Se a linha n for nula
@@ -727,7 +810,21 @@ FILE* passagem2(FILE *arq_intermediario, char* nome_arquivo_obj){
 
 			contador_linha++;
 		} //while (!feof)
+		//Inverte para mandar ordem certa
+		insere_lista(mapa_bits, mapa_provisorio);
+		fclose(obj_provisorio);
+
+		if(!def_end && def_begin){
+			printf("\nErro! Diretiva BEGIN sem um END correspondente!\n");
+		}
+		else if(def_end && def_begin){
+			imprime_tabelas_arquivo(1, obj, arquivo_provisorio_nome, mapa_provisorio);
+		}
+		else{
+			imprime_tabelas_arquivo(0, obj, arquivo_provisorio_nome, mapa_provisorio);
+		}
 }
+
 
 //Funcao de checagem de tipos das instrucoes;
 // Recebe indice atual da posicao na linha, numero da linha (para msg de erro)
@@ -740,6 +837,7 @@ int checa_tipo_instrucao(FILE* obj, int i, int contador_linha, int *contador_pos
 	char *elemento = tokens_linha[i];
 	int indice_retorno, erro = 0;
 
+
 	//Coloca em Upper Case para fazer comparacao
 	string_alta(tokens_linha[i+1]);
 	string_alta(tokens_linha[i+2]);
@@ -751,7 +849,6 @@ int checa_tipo_instrucao(FILE* obj, int i, int contador_linha, int *contador_pos
 		if(eh_externo(tokens_linha[i+1])){
 			//insere(tabela, instrucao, posicao, externo, eh_dado?)
 			insere_tabela(tabela_uso, tokens_linha[i+1], *contador_posicao, 0, 0);
-			*contador_posicao++;
 		}
 		//Se for dado
 		else if(eh_dado(tokens_linha[i+1])==1){
@@ -767,6 +864,8 @@ int checa_tipo_instrucao(FILE* obj, int i, int contador_linha, int *contador_pos
 		if(!erro){
 			//imprime opcode e operador no arquivo
 			fprintf(obj, "%d %d ", opcode(tokens_linha[i]), busca_posicao_memoria(tabela_simbolos, tokens_linha[i+1]));
+			insere_elemento(mapa_bits, "x", "0");
+			insere_elemento(mapa_bits, "x", "1");
 		}
 	}
 	//Se for copy
@@ -774,8 +873,7 @@ int checa_tipo_instrucao(FILE* obj, int i, int contador_linha, int *contador_pos
 			//Se for um simbolo externo, coloca na tabela de uso
 			if(eh_externo(tokens_linha[i+1])){
 				//insere(tabela, instrucao, posicao, externo, eh_dado?)
-				insere_tabela(tabela_uso, tokens_linha[i+1], *contador_posicao, 0, 0);
-				*contador_posicao++;
+				insere_tabela(tabela_uso, tokens_linha[i+1], *contador_posicao-1, 0, 0);
 			}
 			//Se 1 argumento n for dado
 			else if(eh_dado(tokens_linha[i+1])!=1){
@@ -786,7 +884,6 @@ int checa_tipo_instrucao(FILE* obj, int i, int contador_linha, int *contador_pos
 			if(eh_externo(tokens_linha[i+2])){
 				//insere(tabela, instrucao, posicao, externo, eh_dado?)
 				insere_tabela(tabela_uso, tokens_linha[i+2], *contador_posicao, 0, 0);
-				*contador_posicao++;
 			}
 			//Se 2 argumento n for dado
 			else if(eh_dado(tokens_linha[i+2])!=1){
@@ -798,12 +895,16 @@ int checa_tipo_instrucao(FILE* obj, int i, int contador_linha, int *contador_pos
 				//Imprime opcode + posicao dos operandos
 				fprintf(obj, "%d %d %d ", opcode(tokens_linha[i]), busca_posicao_memoria(tabela_simbolos, tokens_linha[i+1]),
 				busca_posicao_memoria(tabela_simbolos, tokens_linha[i+2]));
+				insere_elemento(mapa_bits, "x", "0");
+				insere_elemento(mapa_bits, "x", "1");
+				insere_elemento(mapa_bits, "x", "1");
 			}
 	} //else if
 	else if(!strcmp(tokens_linha[i], "STOP")){
 			//Se n for ultimo token da linha
 			if(strcmp(tokens_linha[i+1], "\0")){
 				printf("Erro Sintatico na linha %d: 'STOP' n recebe argumentos", contador_linha);
+				erro = 1;
 			}
 	}
 	//Se n for nem desvio, copy ou stop, vai ter 1 operando da area de dados
@@ -812,7 +913,6 @@ int checa_tipo_instrucao(FILE* obj, int i, int contador_linha, int *contador_pos
 			if(eh_externo(tokens_linha[i+1])){
 				//insere(tabela, instrucao, posicao, externo, eh_dado?)
 				insere_tabela(tabela_uso, tokens_linha[i+1], *contador_posicao, 0, 0);
-				*contador_posicao++;
 			}
 			else if(eh_dado(tokens_linha[i+1])!=1){
 				printf("Erro Sintatico na linha %d: Argumento invalido!", contador_linha);
@@ -822,11 +922,74 @@ int checa_tipo_instrucao(FILE* obj, int i, int contador_linha, int *contador_pos
 			if(!erro){
 				// Imprime opcode + posicao dos operandos
 				fprintf(obj, "%d %d ", opcode(tokens_linha[i]), busca_posicao_memoria(tabela_simbolos, tokens_linha[i+1]));
+				insere_elemento(mapa_bits, "x", "0");
+				insere_elemento(mapa_bits, "x", "1");
 			} //if (!erro)
 	} //else if(!COPY & !DESVIO)
 
 	if(erro){
-		return 1;
+		return 0;
 	}
+	*contador_posicao = *contador_posicao + 1;
 	return tamanho_instrucao(tokens_linha[i]);
 } //checa_tipo()
+
+//Funcao de checagem de tipos de diretivas;
+// Recebe indice atual da posicao na linha, numero da linha (para msg de erro)
+//e contador posicao (para incrementar posicao)
+//Se os tipos estiverem
+//certos, escreve no arquivo (TODO)
+//Caso contrario, retorna erro
+//Retorna posicao do vetor tokens_linha apos a operacao e seus operandos
+int checa_tipo_diretiva(FILE* obj, int i, int contador_linha, int *contador_posicao){
+	int erro = 0;
+	int op_space;
+	int op_const;
+	char* elemento;
+
+	elemento = tokens_linha[i];
+	string_alta(tokens_linha[i+1]);
+	//Se for space
+	if(!strcmp(elemento, "SPACE")){
+		//Se n for "\0", possui operando
+		if(strcmp(tokens_linha[i+1], "\0")){
+				op_space = atoi(tokens_linha[i+1]);
+				if(op_space<=0){
+					erro = 1;
+				}	//if op_space <=0
+				else{
+					//Coloca 0 para cada espaco reservado
+					for(int j=0; j<op_space; j++){
+						fprintf(obj, "0 ");
+						insere_elemento(mapa_bits, "x", "0");
+					}
+					contador_posicao += op_space;
+				} //else
+		} // if stcmp(tokens_linha[i+1])
+
+		//Se n possuir operando, aloca 1 espaco
+		else{
+			fprintf(obj, "0 ");
+			contador_posicao++;
+		}
+	} //if SPACE
+	//Se for const
+	if(!strcmp(elemento, "CONST")){
+		//Se n tiver operando
+		if(!strcmp(tokens_linha[i+1], "\0")){
+			erro = 1;
+		}
+		//Se tiver operando, pula 1 casa
+		else{
+			op_const = atoi(tokens_linha[i+1]);
+			fprintf(obj, "%d ", op_const);
+			insere_elemento(mapa_bits, "x", "0");
+			contador_posicao++;
+		}
+	}
+
+	if(erro){
+		return -1;
+	}
+	return tamanho_diretiva(tokens_linha[i]);
+}
