@@ -27,6 +27,8 @@ void testes(){
 	imprime_tabela(tabela_simbolos);
 	printf("\nTabela definicoes:\n");
 	imprime_tabela(tabela_definicoes);
+	printf("\nTabela Uso:\n");
+	imprime_tabela(tabela_uso);
 
 	//teste_tabelas();
 	//teste_scanner();
@@ -66,12 +68,13 @@ void teste_scanner(){
 void teste_tabelas(){
 	inicializa_tabelas();
 
-	insere_tabela(tabela_simbolos, "exemplo1", 10, 0);
-	insere_tabela(tabela_simbolos, "exemplo2", 5, 0);
-	insere_tabela(tabela_simbolos, "exemplo3", 15, 0);
+	//insere(tabela, instrucao, posicao, externo, eh_dado?)
+	insere_tabela(tabela_simbolos, "exemplo1", 10, 0, 0);
+	insere_tabela(tabela_simbolos, "exemplo2", 5, 0, 0);
+	insere_tabela(tabela_simbolos, "exemplo3", 15, 0, 0);
 
-	insere_tabela(tabela_definicoes, "exemplo1", 15, 0);
-	insere_tabela(tabela_definicoes, "exemplo2", 3, 0);
+	insere_tabela(tabela_definicoes, "exemplo1", 15, 0, 0);
+	insere_tabela(tabela_definicoes, "exemplo2", 3, 0, 0);
 
 	imprime_tabela(tabela_simbolos);
 	imprime_tabela(tabela_definicoes);

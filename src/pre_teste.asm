@@ -6,7 +6,7 @@ PUBLIC N
 
 SECTION TEXT
 iF L1
-LOAD N 		;faz esta operaçao se L1 for verdadeiro
+LOAD Y		;faz esta operaçao se L1 for verdadeiro
 iF L2
 INPUT N  	;faz esta operaçao se L2 for verdadeiro
 

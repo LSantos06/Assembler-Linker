@@ -15,6 +15,9 @@ typedef struct lista{
   struct lista *proximo;
 } lista_t;
 
+//Mapa de bits com enderecos de relocacao p/ ligador
+extern lista_t *mapa_bits;
+
 // Funcoes para manipulacao das listas de EQU
 void inicializa_lista(lista_t *lista);
 int vazia_lista(lista_t *lista);
