@@ -1,4 +1,4 @@
-TRIANGULO: EQU 1 ;isto é uma constante
+TRIANGULO: EQU 1 ;isto Ã© uma constante
 SECTION TEXT
 INPUT		B
 INPUT		H
@@ -10,7 +10,7 @@ STORE		R
 OUTPUT	R
 STOP
 SECTION DATA
-B:		SPACE
-H:		SPACE
-R:		SPACE
-DOIS:	CONST		2
+B:		SPACE ;15
+H:		SPACE ;16
+R:		SPACE ;17
+DOIS:	CONST		2 ;18
