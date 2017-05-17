@@ -221,11 +221,11 @@ FILE* pre_processamento(FILE *entrada, char *nome_arquivo_pre){
 			// Retirando os comentarios
 			instrucao = strtok(instrucao, ";");
 
-			//char c = instrucao[strlen(instrucao)-1];
-			//printf("%c %d\n", c, c);
+			// char c = instrucao[strlen(instrucao)-1];
+			// printf("%c %d\n", c, c);
 
 			// Formatando o arquivo .pre de acordo com a tabela ASCII
-			if(instrucao[strlen(instrucao)-1] < 30
+			if(instrucao[strlen(instrucao)-1] < 48
 			|| instrucao[strlen(instrucao)-1] > 122){
 				 instrucao[strlen(instrucao)-1] = '\n';
 			}
@@ -241,7 +241,7 @@ FILE* pre_processamento(FILE *entrada, char *nome_arquivo_pre){
 			string_alta(token);
 
       //// Se o 1 token eh "IF"
-      if(!strcmp(token,"IF")){
+      if(strstr(token,"IF")!=NULL){
         //printf("IF\n");
 
 				// Variavel para avaliacao da escrita da linha apos o IF
@@ -289,7 +289,41 @@ FILE* pre_processamento(FILE *entrada, char *nome_arquivo_pre){
         } // 2 token
       } // if
 
-      //// Senao eh "IF"
+			// Se o 1 token eh "STOP"
+			else if(strstr(token,"STOP")!=NULL){
+        //printf("STOP\n");
+
+				// Depende do IF para saber se a linha sera escrita
+				if(linha_anterior_if == 1){
+					// So escreve quando a avaliacao do if for 1
+					if(escreve == 1){
+						fputs(escrita, pre);
+					}
+				}
+				// Linha que nao possui diretivas e independe do IF
+				else{
+					fputs(escrita, pre);
+				}
+			} // stop
+
+			// Se o 1 token eh "END"
+			else if(strstr(token,"END")!=NULL){
+				//printf("STOP\n");
+
+				// Depende do IF para saber se a linha sera escrita
+				if(linha_anterior_if == 1){
+					// So escreve quando a avaliacao do if for 1
+					if(escreve == 1){
+						fputs(escrita, pre);
+					}
+				}
+				// Linha que nao possui diretivas e independe do IF
+				else{
+					fputs(escrita, pre);
+				}
+			} // end
+
+      //// Senao eh "IF", nem "STOP", nem "END"
       else{
         //printf("OUTRO\n");
 
