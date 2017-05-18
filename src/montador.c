@@ -206,6 +206,9 @@ FILE* pre_processamento(FILE *entrada, char *nome_arquivo_pre){
 	int contador_linha = 0;
 	int flag_equ = 0;
 
+	// Variavel para verificacao de erros
+	int flag_erro = 0;
+
   while(!feof(entrada)){
     // Funcao fgets() lê até TLINHA caracteres ou até o '\n'
     instrucao = fgets(linha, TLINHA, entrada);
@@ -237,9 +240,9 @@ FILE* pre_processamento(FILE *entrada, char *nome_arquivo_pre){
       // Funcao strtok() corta uma string em tokens a partir de um separador
       token = strtok(instrucao, " 	");
 
+			// Primeiro Token
 			// Remove os espacos do token
 			token = remove_espacos(token);
-
 			// Passando o token para caixa alta, para fins de comparacao
 			string_alta(token);
 
@@ -256,8 +259,11 @@ FILE* pre_processamento(FILE *entrada, char *nome_arquivo_pre){
           token = strtok(NULL, "	 ");
           //printf("IF %s\n", token);
 
+					// Segundo token
 					// Remove os espacos do token
 					token = remove_espacos(token);
+					// Passando o token para caixa alta, para fins de comparacao
+					string_alta(token);
 
 					//exibe_lista(lista_equs);
 
@@ -275,7 +281,6 @@ FILE* pre_processamento(FILE *entrada, char *nome_arquivo_pre){
 	          else if(!strcmp(resultado_busca->valor, "0")){
 							printf("IF: nao escreve prox\n");
 							escreve = 0;
-	            //printf("nao escreve prox\n");
 	          }
 					}
 					// Operando eh 1
@@ -291,6 +296,7 @@ FILE* pre_processamento(FILE *entrada, char *nome_arquivo_pre){
 					// Se o operando do IF nao for EQU, nem 1, nem 0
 					else{
 							printf("Erro Sintático (Linha %d): operando do IF possui tipo inválido!\n", contador_linha);
+							flag_erro = 1;
 					}
         } // 2 token
       } // if
@@ -359,32 +365,19 @@ FILE* pre_processamento(FILE *entrada, char *nome_arquivo_pre){
           token = strtok(NULL, "	 ");
           //printf("OUTRO %s", token);
 
+					// Segundo token
+					// Remove os espacos do token
+					token = remove_espacos(token);
 					// Passando o token para caixa alta, para fins de comparacao
 					string_alta(token);
 
-					// Buscando o token na lista de EQUS
-					resultado_busca = busca_elemento(lista_equs, token);
-
-					// INSTRUCAO OP, Eh uma instrucao com operando na lista de EQUS
-					if(resultado_busca != NULL){
-						// Separa o id associado da escrita
-						aux_escrita = strtok(escrita, " 	");
-
-						// Acrescenta o valor associado na escrita
-						strcat(aux_escrita, " ");
-						strcat(aux_escrita, resultado_busca->valor);
-						strcat(aux_escrita, "\n");
-						strcpy(escrita, aux_escrita);
-					} // resultado_busca != NULL
-
           // LABEL: EQU, Eh um EQU, linha nao eh escrita no .pre
-					//TODO
 					if(!strcmp(token,"EQU")){
 						printf("nao escreve atual\n");
 
 						// Se as EQUs nao estao no comeco do codigo
 						if(flag_equ == 1){
-							printf("Erro semântico (Linha %d): EQU não está no início do código\n", contador_linha);
+							printf("Warning (Linha %d): EQU não está no início do código\n", contador_linha);
 						}
 
             // Pega o 3 token, que eh o operando de EQU
@@ -394,16 +387,19 @@ FILE* pre_processamento(FILE *entrada, char *nome_arquivo_pre){
 							// Se o operando do EQU nao for um numero
 							if(*token < 48 ||
 							   *token > 57){
-								 printf("Erro sintático (Linha %d): operando do EQU possui tipo inválido!\n\n", contador_linha);
+								 printf("Erro Sintático (Linha %d): operando do EQU possui tipo inválido!\n\n", contador_linha);
+								 flag_erro = 1;
 							}
 
               // Insere na lista de equs
 							if(busca_elemento(lista_equs, label) == NULL){
 								insere_elemento(lista_equs, label, token);
+								// exibe_lista(lista_equs);
 							}
 							else{
 								label[strlen(label)-1] = '\0';
-								printf("Erro semântico (Linha %d): Label %s ja definida!\n\n", contador_linha, label);
+								printf("Erro Semântico (Linha %d): Label %s ja definida!\n\n", contador_linha, label);
+								flag_erro = 1;
 							}
             } // 3 token
           } // token == EQU
@@ -418,6 +414,13 @@ FILE* pre_processamento(FILE *entrada, char *nome_arquivo_pre){
 
 							// LABEL: DIRETIVA OP, diretivas podem conter operandos com elemento terminal
 							if(token!=NULL){
+
+								// Terceiro token
+								// Remove os espacos do token
+								token = remove_espacos(token);
+								// Passando o token para caixa alta, para fins de comparacao
+								string_alta(token);
+
 								// Buscando o token na lista de EQUS
 								resultado_busca = busca_elemento(lista_equs, token);
 
@@ -466,6 +469,15 @@ FILE* pre_processamento(FILE *entrada, char *nome_arquivo_pre){
 	// Fecha o arquivo .pre
 	fclose(pre);
 
+	// Apaga arquivo de saida se encontra erro
+	if(flag_erro == 1){
+		printf("\n##############Erros, arquivo pre-processado nao foi gerado!\n");
+		remove(arquivo_saida);
+	}
+	else{
+		printf("\n##############Arquivo pre-processado %s gerado!\n", arquivo_saida);
+	}
+
 	// Fecha o arquivo .asm de entrada
 	fclose(entrada);
 
@@ -476,7 +488,6 @@ FILE* pre_processamento(FILE *entrada, char *nome_arquivo_pre){
 
 	//Abre pra passar pra passagem1
 	pre = fopen(arquivo_saida, "r");
-	printf("\n##############Arquivo pre-processado %s gerado!\n", arquivo_saida);
 	return pre;
 }
 
