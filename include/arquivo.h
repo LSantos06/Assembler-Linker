@@ -30,7 +30,8 @@ Operacoes_t validacao_argumentos(int argc, char* argv[]);
 void string_alta(char *s);
 // Funcao que passa uma string para caixa baixa
 void string_baixa(char *s);
-
+// Funcao que remove tabs ou espacos de uma string
+char* remove_espacos(char *in);
 //Funcao que escreve estruturas pro arquivo objeto
 void imprime_tabelas_arquivo(int begin_end, FILE* obj, char *obj_provisorio_nome, lista_t *mapa);
 
