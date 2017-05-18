@@ -10,7 +10,7 @@ de aula.
 * Lucas Santos - 14/0151010
 
 ### Instruções de compilação
-A compilação do projeto é feita por meio de um **makefile**, a seguir seguem as opções disponíveis para o mesmo:
+A compilação do projeto é feita por meio de um **Makefile** dentro da pasta **src**. A seguir seguem as opções disponíveis para o mesmo:
 ```shell
 make
   # Realiza a compilação do projeto 

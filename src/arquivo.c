@@ -90,10 +90,10 @@ Operacoes_t validacao_argumentos(int argc, char* argv[]){
  *  Funcao que passa uma string para caixa alta
  */
 void string_alta(char *s){
-		for(; *s; s++){
-			if(('a' <= *s) && (*s <= 'z'))
-				*s = 'A' + (*s - 'a');
-			}
+	for(; *s; s++){
+		if(('a' <= *s) && (*s <= 'z'))
+			*s = 'A' + (*s - 'a');
+		}
 }
 
 /*
@@ -102,9 +102,34 @@ void string_alta(char *s){
  *  Funcao que passa uma string para caixa baixa
  */
 void string_baixa(char *s){
-		for(; *s; s++)
-			if(('A' <= *s) && (*s <= 'Z'))
-				*s = 'a' + (*s - 'A');
+	for(; *s; s++)
+		if(('A' <= *s) && (*s <= 'Z'))
+			*s = 'a' + (*s - 'A');
+}
+
+/*
+ *
+ * remove_espacos()
+ *
+ * Remove os espacos dentro do token
+ */
+char* remove_espacos(char *in){
+	char *out = in;
+
+	int i = 0;
+	while(i < strlen(in)){
+		if(in[i] >= 48 && in[i] <= 122){
+			out[i] = in[i];
+		}
+		else{
+			out[i] = '\0';
+			i++;
+		}
+		//printf("%d char %c ascii %d\n", i, in[i], in[i]);
+		//printf("%d char %c ascii %d\n", i, out[i], out[i]);
+		i++;
+	}
+	return out;
 }
 
 void imprime_tabelas_arquivo(int begin_end, FILE* obj, char *obj_provisorio_nome, lista_t *mapa){
