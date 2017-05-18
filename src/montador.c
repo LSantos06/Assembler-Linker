@@ -741,10 +741,10 @@ FILE* passagem2(FILE *arq_intermediario, char* nome_arquivo_obj){
 					//Se for BEGIN
 					if(!strcmp(tokens_linha[i], "BEGIN")){
 						if(def_begin){
-							printf("Erro! Multiplas diretivas BEGIN no codigo!\n");
+							printf("Erro semântico! Multiplas diretivas BEGIN no codigo!\n");
 						}
 						if(def_end){
-							printf("Erro! Diretiva END declarada antes de BEGIN");
+							printf("Erro semântico! Diretiva END declarada antes de BEGIN");
 						}
 						def_begin = 1;
 						continue;
@@ -752,10 +752,10 @@ FILE* passagem2(FILE *arq_intermediario, char* nome_arquivo_obj){
 					//Se for END
 					if(!strcmp(tokens_linha[i], "END")){
 						if(!def_begin){
-							printf("Erro! Diretiva END sem um BEGIN correspondente!\n");
+							printf("Erro semântico! Diretiva END sem um BEGIN correspondente!\n");
 						}
 						if(def_end){
-							printf("Erro! Multiplas diretivas END no codigo!\n");
+							printf("Erro semântico! Multiplas diretivas END no codigo!\n");
 						}
 						def_end = 1;
 						continue;
@@ -815,7 +815,7 @@ FILE* passagem2(FILE *arq_intermediario, char* nome_arquivo_obj){
 		fclose(obj_provisorio);
 
 		if(!def_end && def_begin){
-			printf("\nErro! Diretiva BEGIN sem um END correspondente!\n");
+			printf("\nErro semântico! Diretiva BEGIN sem um END correspondente!\n");
 		}
 		else if(def_end && def_begin){
 			imprime_tabelas_arquivo(1, obj, arquivo_provisorio_nome, mapa_provisorio);
