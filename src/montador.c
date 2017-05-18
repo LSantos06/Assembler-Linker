@@ -237,11 +237,14 @@ FILE* pre_processamento(FILE *entrada, char *nome_arquivo_pre){
       // Funcao strtok() corta uma string em tokens a partir de um separador
       token = strtok(instrucao, " 	");
 
+			// Remove os espacos do token
+			token = remove_espacos(token);
+
 			// Passando o token para caixa alta, para fins de comparacao
 			string_alta(token);
 
       //// Se o 1 token eh "IF"
-      if(strstr(token,"IF")!=NULL){
+      if(!strcmp(token,"IF")){
         //printf("IF\n");
 
 				// Variavel para avaliacao da escrita da linha apos o IF
@@ -252,6 +255,9 @@ FILE* pre_processamento(FILE *entrada, char *nome_arquivo_pre){
         if(token!=NULL){
           token = strtok(NULL, "	 ");
           //printf("IF %s\n", token);
+
+					// Remove os espacos do token
+					token = remove_espacos(token);
 
 					//exibe_lista(lista_equs);
 
@@ -272,26 +278,32 @@ FILE* pre_processamento(FILE *entrada, char *nome_arquivo_pre){
 	            //printf("nao escreve prox\n");
 	          }
 					}
-					// Operando eh 0
-					else if(!strcmp(token,"1\n")){
+					// Operando eh 1
+					else if(!strcmp(token,"1")){
 						printf("IF: escreve prox\n");
 						escreve = 1;
 					}
-					// Operando eh 1
-					else if(!strcmp(token,"0\n")){
-						printf("IF: escreve prox\n");
+					// Operando eh 0
+					else if(!strcmp(token,"0")){
+						printf("IF: nao escreve prox\n");
 						escreve = 0;
 					}
 					// Se o operando do IF nao for EQU, nem 1, nem 0
-					else if(strcmp(token, "1\n") && strcmp(token, "0\n")){
+					else{
 							printf("Erro Sintático (Linha %d): operando do IF possui tipo inválido!\n", contador_linha);
 					}
         } // 2 token
       } // if
 
 			// Se o 1 token eh "STOP"
-			else if(strstr(token,"STOP")!=NULL){
+			else if(!strcmp(token,"STOP")){
         //printf("STOP\n");
+
+				// Variavel para avaliacao da escrita da linha apos o IF
+				linha_anterior_if = linha_atual_if;
+				linha_atual_if = 0;
+
+        printf("escreve atual (depende se tem IF antes)\n");
 
 				// Depende do IF para saber se a linha sera escrita
 				if(linha_anterior_if == 1){
@@ -307,8 +319,14 @@ FILE* pre_processamento(FILE *entrada, char *nome_arquivo_pre){
 			} // stop
 
 			// Se o 1 token eh "END"
-			else if(strstr(token,"END")!=NULL){
-				//printf("STOP\n");
+			else if(!strcmp(token,"END")){
+				//printf("END\n");
+
+				// Variavel para avaliacao da escrita da linha apos o IF
+				linha_anterior_if = linha_atual_if;
+				linha_atual_if = 0;
+
+        printf("escreve atual (depende se tem IF antes)\n");
 
 				// Depende do IF para saber se a linha sera escrita
 				if(linha_anterior_if == 1){
@@ -360,7 +378,8 @@ FILE* pre_processamento(FILE *entrada, char *nome_arquivo_pre){
 					} // resultado_busca != NULL
 
           // LABEL: EQU, Eh um EQU, linha nao eh escrita no .pre
-          if(!strcmp(token,"EQU")){
+					//TODO
+					if(!strcmp(token,"EQU")){
 						printf("nao escreve atual\n");
 
 						// Se as EQUs nao estao no comeco do codigo
