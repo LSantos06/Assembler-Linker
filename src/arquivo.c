@@ -73,10 +73,12 @@ Operacoes_t validacao_argumentos(int argc, char* argv[]){
 		char *validade_saida = ".";
 
 		// Funcao strstr() checa se subselecao esta dentro de uma string de interesse
-		if((strstr(argv[argc-1], validade_saida))!=NULL){
-			printf("Erro: Arquivo de saida ja possui extensao!\n");
-			exit(-2);
-		}
+		if((strstr(argv[argc-1], "/")==NULL)){
+				if((strstr(argv[argc-1], validade_saida))!=NULL){
+					printf("Erro: Arquivo de saida ja possui extensao!\n");
+					exit(-2);
+				} //if validade_saida
+			} //if /
 	}
 
 	operacao = tipo_operacao(argv[1]);

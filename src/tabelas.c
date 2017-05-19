@@ -11,8 +11,7 @@ const opTab tabela_instrucoes[14] = {
 };
 
 const dirTab tabela_diretivas[7] = {
-	//-1 Indica q numero de operandos e tamanho
-	// eh variavel
+	//nome, ops, tamanho (SPACE eh variavel)
 	{"SECTION", 1, 0}, {"SPACE", 0, 1},
 	{"CONST", 1, 1}, {"PUBLIC", 0, 0},
 	{"EXTERN", 0, 0}, {"BEGIN", 0, 0},
