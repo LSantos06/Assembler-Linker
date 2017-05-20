@@ -6,6 +6,7 @@
 #include <string.h>
 #include "tabelas.h"
 #include "listas.h"
+#include <ctype.h>
 
 typedef enum {
 	PRE_PROC, MONTAGEM, LIGACAO, ERRO
@@ -35,4 +36,12 @@ char* remove_espacos(char *in);
 //Funcao que escreve estruturas pro arquivo objeto
 void imprime_tabelas_arquivo(int begin_end, FILE* obj, char *obj_provisorio_nome, lista_t *mapa);
 
+//Funcao que verifica se um char eh digito decimal ou hexadecimal
+int eh_digito(char c, char base);
+//Funcao que verifica se um numero eh decimal ou hexadecimal
+int eh_numero(char *numero, char base);
+
+//Funcao para pegar string ate operando +
+char* pega_antes_mais(char *token);
+int pega_elemento_vetor(char *token, int linha, int contador_posicao);
 #endif
