@@ -18,6 +18,11 @@ int main(int argc, char* argv[]){
 
 	testes();
 
+	// char *obs, *teste;
+	// teste = "label+10";
+	//
+	// obs = strstr(teste, "+");
+	// printf("\n%s\n", ++obs);
 
 	return 0;
 }

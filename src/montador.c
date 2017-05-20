@@ -806,7 +806,7 @@ FILE* passagem2(FILE *arq_intermediario, char* nome_arquivo_obj){
 
 		    //Analisar todos os tokens da linha
 		    for(i=0; tokens_linha[i]!="\0" && tokens_linha[i]!=NULL; i++){
-					printf("\ntoken= <%s>\n", tokens_linha[i]);
+					//printf("\ntoken= <%s>\n", tokens_linha[i]);
 					string_alta(tokens_linha[i]);
 					//Se for BEGIN
 					if(!strcmp(tokens_linha[i], "BEGIN")){
@@ -976,6 +976,9 @@ int checa_tipo_instrucao(FILE* obj, int i, int contador_linha, int *contador_pos
 				printf("\nErro Sintatico na linha %d: 'STOP' n recebe argumentos\n", contador_linha);
 				erro = 1;
 			}
+			if(!erro)
+			fprintf(obj, "%d ", opcode(tokens_linha[i]));
+			insere_elemento(mapa_bits, "x", "0");
 	}
 	//Se n for nem desvio, copy ou stop, vai ter 1 operando da area de dados
 	else{
