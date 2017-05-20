@@ -86,6 +86,69 @@ Operacoes_t validacao_argumentos(int argc, char* argv[]){
 	return operacao;
 }
 
+int eh_digito(char c, char base){
+	switch(base){
+		case 'd':
+		case 'D':
+					if(c < '0' || c > '9'){
+						return 0;
+					}
+					else{
+						return 1;
+					}
+					break;
+		case 'h':
+		case 'H':
+					if(c<'0' || (c > '9' && c < 'A') || (c > 'F')){
+						return 0;
+					}
+					else{
+						return 1;
+					}
+					break;
+		default:
+					printf("\nBase nao identificada\n");
+					return -1;
+					break;
+	}
+
+}
+
+int eh_numero(char *numero, char base){
+	int i = 0;
+	switch(base){
+		case 'd':
+		case 'D':
+				while(i < strlen(numero)){
+					//Se tiver algum elemento que nao eh digito
+					if(!eh_digito(numero[i], 'd')){
+						return 0;
+					}
+					i++;
+				}
+				break;
+		case 'h':
+		case 'H':
+				if(numero[0]!='0' || numero[1]!='X'){
+					return 0;
+				}
+				i = 2;
+				while(i < strlen(numero)){
+					//Se tiver algum elemento que nao eh digito
+					if(!eh_digito(numero[i], 'h')){
+						return 0;
+					}
+					i++;
+				}
+				break;
+		default:
+					printf("\nBase nao identificada\n");
+					return -1;
+					break;
+	}
+	return 1;
+}
+
 /*
  *  string_alta()
  *
@@ -110,6 +173,25 @@ void string_baixa(char *s){
 }
 
 /*
+*	pega_antes_mais()
+*
+* Pega label ate '+'
+*/
+char* pega_antes_mais(char *token){
+	int i = 0;
+	char *resultado = token;
+
+		for(i=0; i<strlen(token); i++){
+			if(token[i]=='+'){
+				resultado[i] = '\0';
+				break;
+			}
+			resultado[i] = token[i];
+		}
+	return resultado;
+}
+
+/*
  *
  * remove_espacos()
  *
@@ -120,7 +202,7 @@ char* remove_espacos(char *in){
 
 	int i = 0;
 	while(i < strlen(in)){
-		if(in[i] >= 48 && in[i] <= 122){
+		if((in[i] >= 48 && in[i] <= 122) || in[i]=='+'){
 			out[i] = in[i];
 		}
 		else{
@@ -132,6 +214,49 @@ char* remove_espacos(char *in){
 		i++;
 	}
 	return out;
+}
+
+int pega_elemento_vetor(char *token, int linha, int contador_posicao){
+	int depois_mais_num1 = 0;
+	char *antes_mais, *depois_mais;
+	int erro = 0;
+
+	depois_mais = strstr(token, "+");
+	if(depois_mais == NULL){
+		return 0;
+	}
+	//Se possuir +
+	else{
+			//Vai para depois do +
+			depois_mais++;
+			if(!eh_numero(depois_mais, 'd')){
+				printf("\n%s\n", depois_mais);
+				printf("\nErro Sintatico na linha %d: Esperado um numero apos '+'!\n"
+				, linha);
+				erro = 1;
+			}
+				//Se for numero
+				else{
+					depois_mais_num1 = atoi(depois_mais);
+					antes_mais = pega_antes_mais(token);
+					//Se for um simbolo externo, coloca na tabela de uso
+					if(eh_externo(antes_mais)){
+						//insere(tabela, instrucao, posicao, externo, eh_dado?)
+						insere_tabela(tabela_uso, antes_mais, contador_posicao, 0, 0);
+					}
+					else if(eh_dado(antes_mais)!=1){
+						printf("\nErro Sintatico na linha %d: Label invalido!\n"
+						, linha);
+						erro = 1;
+					}
+				} //else numero
+			} // else (depois_mais == NULL)
+
+			if(erro){
+				return -1;
+			}
+
+			return depois_mais_num1;
 }
 
 void imprime_tabelas_arquivo(int begin_end, FILE* obj, char *obj_provisorio_nome, lista_t *mapa){

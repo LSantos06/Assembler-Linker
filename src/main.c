@@ -18,11 +18,16 @@ int main(int argc, char* argv[]){
 
 	testes();
 
+
 	// char *obs, *teste;
 	// teste = "label+10";
 	//
 	// obs = strstr(teste, "+");
 	// printf("\n%s\n", ++obs);
+	// char *token = "label+algo";
+	// char *resposta;
+	// resposta = pega_antes_mais(token);
+	// printf("\n%s\n", resposta);
 
 	return 0;
 }
