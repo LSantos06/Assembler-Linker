@@ -38,6 +38,7 @@ void seleciona_operacao(int argc, char* argv[]){
 		// Variaveis que checam as extensoes
 		char *validade_entrada_pre = ".pre";
 		char *validade_entrada_asm = ".asm";
+		char *nome_arq;
 
 		//Cria as tabelas de simbolos e de definicoes vazias
 		inicializa_tabelas();
@@ -78,7 +79,8 @@ void seleciona_operacao(int argc, char* argv[]){
 				printf("Erro na abertura do arquivo!\n");
 				exit(-5);
 			}
-
+			//Copia nome do arquivo (pre_processamento altera argv[3])
+			nome_arq = strdup(argv[3]);
 			// Se a extensao for .asm
 			if(strstr(argv[2], validade_entrada_pre)==NULL){
 				// Pre-processamento seguido da passagem 1
@@ -90,7 +92,7 @@ void seleciona_operacao(int argc, char* argv[]){
 				passagem1(fp);
 			}
 			//Passa arquivo (ja com rewind) e nome do arquivo que tera extensao .o
-			passagem2(fp, argv[3]);
+			passagem2(fp, nome_arq);
 
 		} // montagem
 	} // preproc ou montagem
@@ -112,7 +114,7 @@ void scanner(char *linha, int contador_linha, char *delimitador){
 	token = strtok(linha, delimitador);
 
 	while(token!=NULL){
-		tokens_linha[i] = strdup(token);
+		tokens_linha[i] = remove_espacos(strdup(token));
 		//Se token comeca com numero e n vem depois de uma diretiva SPACE ou CONST: ERROR -6
 		if(i>0 && token[0]>='0' && token[0]<='9' && (strcmp(tokens_linha[i-1], "SPACE") && strcmp(tokens_linha[i-1], "CONST")) ){
 			printf("Erro lexico com token '%s': inicio com digito (linha %d)\n", token, contador_linha);
@@ -511,6 +513,8 @@ FILE* passagem1(FILE *pre_processado){
 	    printf("Erro na abertura do arquivo!\n");
 	    exit(-4);
  	}
+
+	printf("\n:::::::::::::PASSAGEM 1\n");
 	int contador_posicao = 0;
 	int contador_linha = 1;
 	int i = 0;
@@ -784,6 +788,7 @@ FILE* passagem2(FILE *arq_intermediario, char* nome_arquivo_obj){
 		//3- Tabelas e mapa de bits
 		fprintf(obj_provisorio, "CODE\n");
 
+		printf("\n:::::::::::::PASSAGEM 2\n");
 		while(!feof(arq_intermediario)){
 			// Funcao fgets() lê até TLINHA caracteres ou até o '\n'
 			instrucao = fgets(linha, TLINHA, arq_intermediario);
@@ -800,15 +805,16 @@ FILE* passagem2(FILE *arq_intermediario, char* nome_arquivo_obj){
 
 
 		    //Analisar todos os tokens da linha
-		    for(i=0; tokens_linha[i]!="\0"; i++){
+		    for(i=0; tokens_linha[i]!="\0" && tokens_linha[i]!=NULL; i++){
+					printf("\ntoken= <%s>\n", tokens_linha[i]);
 					string_alta(tokens_linha[i]);
 					//Se for BEGIN
 					if(!strcmp(tokens_linha[i], "BEGIN")){
 						if(def_begin){
-							printf("Erro! Multiplas diretivas BEGIN no codigo!\n");
+							printf("\nErro semântico! Multiplas diretivas BEGIN no codigo!\n");
 						}
 						if(def_end){
-							printf("Erro! Diretiva END declarada antes de BEGIN");
+							printf("\nErro semântico! Diretiva END declarada antes de BEGIN\n");
 						}
 						def_begin = 1;
 						continue;
@@ -816,10 +822,10 @@ FILE* passagem2(FILE *arq_intermediario, char* nome_arquivo_obj){
 					//Se for END
 					if(!strcmp(tokens_linha[i], "END")){
 						if(!def_begin){
-							printf("Erro! Diretiva END sem um BEGIN correspondente!\n");
+							printf("\nErro semântico! Diretiva END sem um BEGIN correspondente!\n");
 						}
 						if(def_end){
-							printf("Erro! Multiplas diretivas END no codigo!\n");
+							printf("\nErro semântico! Multiplas diretivas END no codigo!\n");
 						}
 						def_end = 1;
 						continue;
@@ -827,7 +833,7 @@ FILE* passagem2(FILE *arq_intermediario, char* nome_arquivo_obj){
 					//Se for label, ignora
 					if(strstr(tokens_linha[i], ":")){
 							if(def_label){
-								printf("Erro na linha %d: Label ja definido na linha\n", contador_linha);
+								printf("\nErro na linha %d: Label ja definido na linha\n", contador_linha);
 							}
 							else{
 								def_label = 1;
@@ -879,7 +885,7 @@ FILE* passagem2(FILE *arq_intermediario, char* nome_arquivo_obj){
 		fclose(obj_provisorio);
 
 		if(!def_end && def_begin){
-			printf("\nErro! Diretiva BEGIN sem um END correspondente!\n");
+			printf("\nErro semântico! Diretiva BEGIN sem um END correspondente!\n");
 		}
 		else if(def_end && def_begin){
 			imprime_tabelas_arquivo(1, obj, arquivo_provisorio_nome, mapa_provisorio);
@@ -916,12 +922,12 @@ int checa_tipo_instrucao(FILE* obj, int i, int contador_linha, int *contador_pos
 		}
 		//Se for dado
 		else if(eh_dado(tokens_linha[i+1])==1){
-			printf("Erro Semantico na linha %d: Pulo para rotulo invalido", contador_linha);
+			printf("\nErro Semantico na linha %d: Pulo para rotulo invalido\n", contador_linha);
 			erro = 1;
 		}
 		//Se n tiver achado na tabela
 		else if(eh_dado(tokens_linha[i+1])==-1){
-			printf("Erro Sintatico na linha %d: Argumento invalido", contador_linha);
+			printf("\nErro Sintatico na linha %d: Argumento invalido\n", contador_linha);
 			erro = 1;
 		}
 		//Se argumento for valido, imprime
@@ -941,7 +947,7 @@ int checa_tipo_instrucao(FILE* obj, int i, int contador_linha, int *contador_pos
 			}
 			//Se 1 argumento n for dado
 			else if(eh_dado(tokens_linha[i+1])!=1){
-				printf("Erro Sintatico na linha %d: Argumento 1 de 'COPY' invalido", contador_linha);
+				printf("\nErro Sintatico na linha %d: Argumento 1 de 'COPY' invalido\n", contador_linha);
 				erro = 1;
 			}
 			//Se for um simbolo externo, coloca na tabela de uso
@@ -951,7 +957,7 @@ int checa_tipo_instrucao(FILE* obj, int i, int contador_linha, int *contador_pos
 			}
 			//Se 2 argumento n for dado
 			else if(eh_dado(tokens_linha[i+2])!=1){
-				printf("Erro Sintatico na linha %d: Argumento 2 de 'COPY' invalido", contador_linha);
+				printf("\nErro Sintatico na linha %d: Argumento 2 de 'COPY' invalido\n", contador_linha);
 				erro = 1;
 			}
 			//Se os 2 forem argumentos validos
@@ -967,7 +973,7 @@ int checa_tipo_instrucao(FILE* obj, int i, int contador_linha, int *contador_pos
 	else if(!strcmp(tokens_linha[i], "STOP")){
 			//Se n for ultimo token da linha
 			if(strcmp(tokens_linha[i+1], "\0")){
-				printf("Erro Sintatico na linha %d: 'STOP' n recebe argumentos", contador_linha);
+				printf("\nErro Sintatico na linha %d: 'STOP' n recebe argumentos\n", contador_linha);
 				erro = 1;
 			}
 	}
@@ -979,7 +985,7 @@ int checa_tipo_instrucao(FILE* obj, int i, int contador_linha, int *contador_pos
 				insere_tabela(tabela_uso, tokens_linha[i+1], *contador_posicao, 0, 0);
 			}
 			else if(eh_dado(tokens_linha[i+1])!=1){
-				printf("Erro Sintatico na linha %d: Argumento invalido!", contador_linha);
+				printf("\nErro Sintatico na linha %d: Argumento invalido!\n", contador_linha);
 				erro = 1;
 			} //if
 			//Se for valido
@@ -1034,7 +1040,8 @@ int checa_tipo_diretiva(FILE* obj, int i, int contador_linha, int *contador_posi
 		//Se n possuir operando, aloca 1 espaco
 		else{
 			fprintf(obj, "0 ");
-			contador_posicao++;
+			insere_elemento(mapa_bits, "x", "0");
+			contador_posicao +=1;
 		}
 	} //if SPACE
 	//Se for const
