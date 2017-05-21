@@ -78,7 +78,7 @@ void ligador(int num_objetos, int argc, char* argv[]){
           // Info eh um elemento da tabela de definicao
           flag = 2;
         }
-        else if(!strcmp(elemento,"TABLE RELOCATION\n")){
+        else if(!strcmp(elemento,"TABLE RELOCATION\n") || !strcmp(elemento,"TABLE REALOCATION\n")){
           // Info eh um elemento da tabela de realocacao
           flag = 3;
         }
