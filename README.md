@@ -7,7 +7,11 @@ de aula.
 
 ### Integrantes do grupo
 * Davi Rabbouni - 15/0033010
+  - [X] _Versão do gcc_:
+  - [X] _Sistema Operacional_:
 * Lucas Santos - 14/0151010
+  - [X] _Versão do gcc_: gcc version 5.4.0 20160609 (Ubuntu 5.4.0-6ubuntu1~16.04.4) 
+  - [X] _Sistema Operacional_: elementary OS 0.4 Loki (64-bit) Built on "Ubuntu 16.04.2 LTS"
 
 ### Instruções de compilação
 A compilação do projeto é feita por meio de um **Makefile** dentro da pasta **src**. A seguir seguem as opções disponíveis para o mesmo:
