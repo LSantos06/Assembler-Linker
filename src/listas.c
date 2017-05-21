@@ -1,6 +1,31 @@
 #include "listas.h"
 
 lista_t *mapa_bits;
+lista_t *lista_zeros;
+lista_t *lista_ctes;
+lista_t *mapa_provisorio;
+lista_t *lista_tamanhos_vetores;
+
+void instancia_listas_globais(){
+	//Inicia mapa de bits pra mandar enderecos de relocacao
+	//Mapa bits vai conter dados invertidos, pra passar pro mapa provisorio dps
+	mapa_provisorio = (lista_t*)  malloc(sizeof(lista_t));
+	inicializa_lista(mapa_provisorio);
+	mapa_bits = (lista_t *) malloc(sizeof(lista_t));
+	inicializa_lista(mapa_bits);
+
+	//Inicia lista de zeros para checar divisao por zero
+	lista_zeros = (lista_t *) malloc(sizeof(lista_t));
+	inicializa_lista(lista_zeros);
+
+	//Lista de alterados para verificar alteracoes em constantes
+	lista_ctes = (lista_t *) malloc(sizeof(lista_t));
+	inicializa_lista(lista_ctes);
+
+	//Lista com tamanhos dos vetores, para analisar excecao de tamanho
+	lista_tamanhos_vetores = (lista_t *) malloc(sizeof(lista_t));
+	inicializa_lista(lista_tamanhos_vetores);
+}
 
 // Inicializa lista
 void inicializa_lista(lista_t *lista){
@@ -73,6 +98,12 @@ lista_t * busca_elemento(lista_t *lista, char *id_buscado){
   }
 	// Nao achou o EQU na lista
 	return NULL;
+}
+
+char *pega_valor(lista_t *lista, char *id_buscado){
+	lista_t *aux = busca_elemento(lista, id_buscado);
+
+	return aux->valor;
 }
 
 // Mostra a lista

@@ -222,6 +222,7 @@ int pega_elemento_vetor(char *token, int linha, int contador_posicao){
 	int erro = 0;
 
 	depois_mais = strstr(token, "+");
+	//Se n tiver +, retorna 0
 	if(depois_mais == NULL){
 		return 0;
 	}
@@ -229,34 +230,46 @@ int pega_elemento_vetor(char *token, int linha, int contador_posicao){
 	else{
 			//Vai para depois do +
 			depois_mais++;
+			//Se n for numero, erro
 			if(!eh_numero(depois_mais, 'd')){
-				printf("\n%s\n", depois_mais);
 				printf("\nErro Sintatico na linha %d: Esperado um numero apos '+'!\n"
 				, linha);
 				erro = 1;
 			}
-				//Se for numero
-				else{
-					depois_mais_num1 = atoi(depois_mais);
-					antes_mais = pega_antes_mais(token);
-					//Se for um simbolo externo, coloca na tabela de uso
-					if(eh_externo(antes_mais)){
-						//insere(tabela, instrucao, posicao, externo, eh_dado?)
-						insere_tabela(tabela_uso, antes_mais, contador_posicao, 0, 0);
-					}
-					else if(eh_dado(antes_mais)!=1){
-						printf("\nErro Sintatico na linha %d: Label invalido!\n"
-						, linha);
+			//Se for numero
+			else{
+				depois_mais_num1 = atoi(depois_mais);
+				antes_mais = pega_antes_mais(token);
+				//Tamanho do vetor - 1, pois endereco comeca em 0
+				if(busca_elemento(lista_tamanhos_vetores, antes_mais)!=NULL){
+					//printf("\n<%s>\n", pega_valor(lista_tamanhos_vetores, antes_mais));
+					//printf("\n%s %d %d\n", antes_mais, depois_mais_num1, atoi(pega_valor(lista_tamanhos_vetores, antes_mais))-1);
+					if(depois_mais_num1 > (atoi(pega_valor(lista_tamanhos_vetores, antes_mais))-1)){
 						erro = 1;
+						printf("\nErro Semantico na linha %d: Endereco ultrapassa tamanho do vetor\n"
+						, linha);
+						return -1;
 					}
-				} //else numero
-			} // else (depois_mais == NULL)
+				}
+				//Se for um simbolo externo, coloca na tabela de uso
+				if(eh_externo(antes_mais)){
+					//insere(tabela, instrucao, posicao, externo, eh_dado?)
+					insere_tabela(tabela_uso, antes_mais, contador_posicao, 0, 0);
+				}
+				//Se n for externo, verifica se n eh dado valido
+				else if(eh_dado(antes_mais)!=1){
+					printf("\nErro Sintatico na linha %d: Label invalido!\n"
+					, linha);
+					erro = 1;
+				}
+			} //else numero
+		} // else (depois_mais == NULL)
 
-			if(erro){
-				return -1;
-			}
+		if(erro){
+			return -1;
+		}
 
-			return depois_mais_num1;
+		return depois_mais_num1;
 }
 
 void imprime_tabelas_arquivo(int begin_end, FILE* obj, char *obj_provisorio_nome, lista_t *mapa){

@@ -525,12 +525,13 @@ FILE* passagem1(FILE *pre_processado){
 
 	//Cria as tabelas de simbolos e de definicoes vazias
 	inicializa_tabelas();
-
+	instancia_listas_globais();
 
 	char linha[TLINHA];
 	char *instrucao;
 	char *label;
 	char *elemento;
+	char *valor = "xx";
 
 	while(!feof(pre_processado)){
 			//Zera definicoes de diretivas, instrucoes e labels a cada linha
@@ -651,12 +652,16 @@ FILE* passagem1(FILE *pre_processado){
 													printf("\nErro! Operando para diretiva SPACE invalido: numero menor ou igual a 0!\n");
 												}	//if op_space <=0
 												else{
+													insere_elemento(lista_tamanhos_vetores,
+														pega_primeiro_simbolo(tabela_simbolos), tokens_linha[i+1]);
 													contador_posicao += op_space;
 												} //else
 										} // if stcmp(tokens_linha[i+1])
 
 										//Se n possuir operando, aloca 1 espaco
 										else{
+											insere_elemento(lista_tamanhos_vetores,
+												pega_primeiro_simbolo(tabela_simbolos), "1");
 											contador_posicao++;
 										}
 									} //if SPACE
@@ -668,7 +673,15 @@ FILE* passagem1(FILE *pre_processado){
 										}
 										//Se tiver operando, pula 1 casa
 										else{
+											//Se for CONST
+											insere_elemento(lista_ctes,
+												pega_primeiro_simbolo(tabela_simbolos), valor);
 											contador_posicao++;
+											//Se for CONST 0
+											if(atoi(tokens_linha[i+1])==0){
+												insere_elemento(lista_zeros
+													, pega_primeiro_simbolo(tabela_simbolos), valor);
+											}
 										}
 									}
 									break;
@@ -772,13 +785,6 @@ FILE* passagem2(FILE *arq_intermediario, char* nome_arquivo_obj){
 		FILE* obj_provisorio;
 		FILE* obj;
 
-		//Inicia mapa de bits pra mandar enderecos de relocacao
-		//Mapa bits vai conter dados invertidos, pra passar pro mapa provisorio dps
-		lista_t *mapa_provisorio = (lista_t*)  malloc(sizeof(lista_t));
-		inicializa_lista(mapa_provisorio);
-		mapa_bits = (lista_t *) malloc(sizeof(lista_t));
-		inicializa_lista(mapa_bits);
-
 		arquivo_saida = strcat(nome_arquivo_obj, ".o");
 		obj = fopen(arquivo_saida, "w");
 		//Abre arquivo pra escrita
@@ -810,6 +816,24 @@ FILE* passagem2(FILE *arq_intermediario, char* nome_arquivo_obj){
 					//printf("\ntoken= <%s>\n", tokens_linha[i]);
 					string_alta(tokens_linha[i]);
 
+					if(!strcmp(tokens_linha[i], "COPY")){
+						if(busca_elemento(lista_ctes, tokens_linha[i+2])!=NULL){
+							printf("\nErro Semantico na linha %d: Modificacao de um valor constante\n",
+						contador_linha);
+						}
+					}
+					if(!strcmp(tokens_linha[i], "STORE") || !strcmp(tokens_linha[i], "INPUT")){
+						if(busca_elemento(lista_ctes, tokens_linha[i+1])!=NULL){
+							printf("\nErro Semantico na linha %d: Modificacao de um valor constante\n",
+						contador_linha);
+						}
+					}
+					if(!strcmp(tokens_linha[i], "DIV")){
+						if(busca_elemento(lista_zeros, tokens_linha[i+1])!=NULL){
+							printf("\nErro Semantico na linha %d: Tentativa de divisao por zero\n",
+						contador_linha);
+						}
+					}
 					//Se for STOP
 					if(!strcmp(tokens_linha[i], "STOP")){
 						def_stop = 1;
@@ -882,8 +906,6 @@ FILE* passagem2(FILE *arq_intermediario, char* nome_arquivo_obj){
 				} //For (!fim da linha)
 			} //Se a linha n for nula
 
-
-
 			contador_linha++;
 		} //while (!feof)
 		//Inverte para mandar ordem certa
@@ -895,6 +917,7 @@ FILE* passagem2(FILE *arq_intermediario, char* nome_arquivo_obj){
 		}
 		else if(def_end && def_begin){
 			imprime_tabelas_arquivo(1, obj, arquivo_provisorio_nome, mapa_provisorio);
+			printf("\nArquivo %s criado!\n", arquivo_saida);
 		}
 		else{
 			if(!def_stop){
@@ -902,6 +925,7 @@ FILE* passagem2(FILE *arq_intermediario, char* nome_arquivo_obj){
 			}
 			else{
 				imprime_tabelas_arquivo(0, obj, arquivo_provisorio_nome, mapa_provisorio);
+				printf("\nArquivo %s criado!\n", arquivo_saida);
 			}
 		}
 		//Exclui arquivo provisorio, pois nao sera mais utilizado
@@ -918,9 +942,10 @@ FILE* passagem2(FILE *arq_intermediario, char* nome_arquivo_obj){
 //Retorna posicao do vetor tokens_linha apos a operacao e seus operandos
 int checa_tipo_instrucao(FILE* obj, int i, int contador_linha, int *contador_posicao){
 	char *elemento = tokens_linha[i];
-	char *antes_mais, *depois_mais;
+	char *antes_mais1, *antes_mais2;
 	int depois_mais_num1, depois_mais_num2;
 	int indice_retorno, erro = 0;
+	int externo1 = 0, externo2 = 0;
 
 
 	//Coloca em Upper Case para fazer comparacao
@@ -932,6 +957,7 @@ int checa_tipo_instrucao(FILE* obj, int i, int contador_linha, int *contador_pos
 	|| !strcmp(tokens_linha[i], "JMPP") || !strcmp(tokens_linha[i], "JMPZ")){
 		//Se for um simbolo externo, coloca na tabela de uso
 		if(eh_externo(tokens_linha[i+1])){
+			externo1 = 1;
 			//insere(tabela, instrucao, posicao, externo, eh_dado?)
 			insere_tabela(tabela_uso, tokens_linha[i+1], *contador_posicao, 0, 0);
 		}
@@ -950,7 +976,12 @@ int checa_tipo_instrucao(FILE* obj, int i, int contador_linha, int *contador_pos
 			//imprime opcode e operador no arquivo
 			fprintf(obj, "%d %d ", opcode(tokens_linha[i]), busca_posicao_memoria(tabela_simbolos, tokens_linha[i+1]));
 			insere_elemento(mapa_bits, "x", "0");
-			insere_elemento(mapa_bits, "x", "1");
+			if(externo1){
+				insere_elemento(mapa_bits, "x", "0");
+			}
+			else{
+				insere_elemento(mapa_bits, "x", "1");
+			}
 		}
 	}
 	//Se for copy
@@ -959,8 +990,10 @@ int checa_tipo_instrucao(FILE* obj, int i, int contador_linha, int *contador_pos
 				depois_mais_num1 = pega_elemento_vetor(tokens_linha[i+1], contador_linha, *contador_posicao-1);
 					//Se for 0, n tem +
 					if(!depois_mais_num1){
+							antes_mais1 = tokens_linha[i+1];
 							//Se for um simbolo externo, coloca na tabela de uso
 							if(eh_externo(tokens_linha[i+1])){
+								externo1 = 1;
 								//insere(tabela, instrucao, posicao, externo, eh_dado?)
 								insere_tabela(tabela_uso, tokens_linha[i+1], *contador_posicao-1, 0, 0);
 							}
@@ -973,17 +1006,26 @@ int checa_tipo_instrucao(FILE* obj, int i, int contador_linha, int *contador_pos
 					else if(depois_mais_num1 == -1){
 						erro = 1;
 					}
+					//Dando 1, copia so a primeira parte
+					else if (depois_mais_num1){
+						antes_mais1 = pega_antes_mais(tokens_linha[i+1]);
+						if(eh_externo(antes_mais1)){
+							externo1 = 1;
+						}
+					}
 
 				//TRATAMENTO TOKEN 2
 				depois_mais_num2 = pega_elemento_vetor(tokens_linha[i+2], contador_linha, *contador_posicao);
 					//Se for 0, n tem +
 					if(!depois_mais_num2){
+							antes_mais2 = tokens_linha[i+2];
 							//Se for um simbolo externo, coloca na tabela de uso
 							if(eh_externo(tokens_linha[i+2])){
+								externo2 = 1;
 								//insere(tabela, instrucao, posicao, externo, eh_dado?)
 								insere_tabela(tabela_uso, tokens_linha[i+2], *contador_posicao, 0, 0);
 							}
-							//Se 1 argumento n for dado
+							//Se 2 argumento n for dado
 							else if(eh_dado(tokens_linha[i+2])!=1){
 								printf("\nErro Sintatico na linha %d: Argumento 2 de 'COPY' invalido\n", contador_linha);
 								erro = 1;
@@ -992,16 +1034,33 @@ int checa_tipo_instrucao(FILE* obj, int i, int contador_linha, int *contador_pos
 					else if(depois_mais_num2 == -1){
 						erro = 1;
 					}
+					//Dando 1, copia so a primeira parte
+					else if (depois_mais_num2){
+						antes_mais2 = pega_antes_mais(tokens_linha[i+2]);
+						if(eh_externo(antes_mais2)){
+							externo2 = 1;
+						}
+					}
 
 				//Se os 2 forem argumentos validos
 				if(!erro){
+					int n1 = busca_posicao_memoria(tabela_simbolos, antes_mais1)+depois_mais_num1;
+					int n2 = busca_posicao_memoria(tabela_simbolos, antes_mais2)+depois_mais_num2;
 					//Imprime opcode + posicao dos operandos
-					fprintf(obj, "%d %d %d ", opcode(tokens_linha[i]),
-					busca_posicao_memoria(tabela_simbolos, tokens_linha[i+1])+depois_mais_num1,
-					busca_posicao_memoria(tabela_simbolos, tokens_linha[i+2])+depois_mais_num2);
+					fprintf(obj, "%d %d %d ", opcode(tokens_linha[i]), n1, n2);
 					insere_elemento(mapa_bits, "x", "0");
-					insere_elemento(mapa_bits, "x", "1");
-					insere_elemento(mapa_bits, "x", "1");
+					if(externo1){
+						insere_elemento(mapa_bits, "x", "0");
+					}
+					else{
+						insere_elemento(mapa_bits, "x", "1");
+					}
+					if(externo2){
+						insere_elemento(mapa_bits, "x", "0");
+					}
+					else{
+						insere_elemento(mapa_bits, "x", "1");
+					}
 				}
 	} //else if (COPY)
 	else if(!strcmp(tokens_linha[i], "STOP")){
@@ -1019,8 +1078,11 @@ int checa_tipo_instrucao(FILE* obj, int i, int contador_linha, int *contador_pos
 			depois_mais_num1 = pega_elemento_vetor(tokens_linha[i+1], contador_linha, *contador_posicao);
 			//Se n possuir +, considera todo o token como label
 			if(depois_mais_num1 == 0){
+					//Pega o label td para impressao
+					antes_mais1 = tokens_linha[i+1];
 					//Se for um simbolo externo, coloca na tabela de uso
 					if(eh_externo(tokens_linha[i+1])){
+						externo1 = 1;
 						//insere(tabela, instrucao, posicao, externo, eh_dado?)
 						insere_tabela(tabela_uso, tokens_linha[i+1], *contador_posicao, 0, 0);
 					}
@@ -1032,13 +1094,27 @@ int checa_tipo_instrucao(FILE* obj, int i, int contador_linha, int *contador_pos
 			else if (depois_mais_num1 == -1){
 				erro = 1;
 			}
+			//Dando 1, copia so a primeira parte
+			else if (depois_mais_num1){
+				//Pega ate o mais para tratar como label
+				antes_mais1 = pega_antes_mais(tokens_linha[i+1]);
+				if(eh_externo(antes_mais1)){
+					externo1 = 1;
+				}
+			}
 			//Se for valido
 			if(!erro){
-			// Imprime opcode + posicao dos operandos
-					fprintf(obj, "%d %d ", opcode(tokens_linha[i]), busca_posicao_memoria(tabela_simbolos, tokens_linha[i+1])+depois_mais_num1);
+					int n1 = busca_posicao_memoria(tabela_simbolos, antes_mais1)+depois_mais_num1;
+					// Imprime opcode + posicao dos operandos
+					fprintf(obj, "%d %d ", opcode(tokens_linha[i]), n1);
 					insere_elemento(mapa_bits, "x", "0");
-					insere_elemento(mapa_bits, "x", "1");
-					} //if (!erro)
+					if(externo1){
+						insere_elemento(mapa_bits, "x", "0");
+					}
+					else{
+						insere_elemento(mapa_bits, "x", "1");
+					}
+				} //if (!erro)
 	} //else if(!COPY & !DESVIO)
 
 	if(erro){
@@ -1060,6 +1136,7 @@ int checa_tipo_diretiva(FILE* obj, int i, int contador_linha, int *contador_posi
 	int op_space;
 	int op_const;
 	char* elemento;
+	int tamanho_elemento = 0;
 
 	elemento = tokens_linha[i];
 	string_alta(tokens_linha[i+1]);
@@ -1083,6 +1160,7 @@ int checa_tipo_diretiva(FILE* obj, int i, int contador_linha, int *contador_posi
 
 		//Se n possuir operando, aloca 1 espaco
 		else{
+			op_space = 1;
 			fprintf(obj, "0 ");
 			insere_elemento(mapa_bits, "x", "0");
 			contador_posicao +=1;

@@ -147,6 +147,11 @@ void copia_para_definicoes(){
 	}
 }
 
+char *pega_primeiro_simbolo(addrTab *tabela){
+	addrTab *aux = tabela->prox;
+
+	return aux->simbolo;
+}
 int pertence_tabela(addrTab* tabela, char* nome){
 	addrTab *aux = busca_simbolo(tabela, nome);
 
