@@ -17,14 +17,15 @@
 void seleciona_operacao(int argc, char* argv[]);
 
 // Funcao que separara os elementos da linha
-void scanner(char *linha, int contador_linha, char *delimitador);
+int scanner(char *linha, int contador_linha, char *delimitador);
 
 // Realiza o pre processamento sobre um arquivo .asm (-p), gerando um arquivo .pre
 FILE* pre_processamento(FILE *entrada, char* nome_arquivo_pre);
 
 // Realiza a montagem sobre um arquivo .asm ou .pre (-o)
-FILE* passagem1(FILE *pre_processado);
-FILE* passagem2(FILE *arq_intermediario, char* nome_arquivo_obj);
+//Passagem 1 retorna 0 se houve um erro, 1 se nao houver erros
+int passagem1(FILE *pre_processado);
+FILE* passagem2(FILE *arq_intermediario, char* nome_arquivo_obj, int erro_passagem_1);
 
 // Exibe os tokens de uma linha
 void imprime_tokens();

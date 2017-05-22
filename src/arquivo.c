@@ -233,7 +233,9 @@ char* pega_antes_mais(char *token){
 /*
  *	pega_elemento_vetor()
  *
- *  TODO
+ *  Funcao que compara o elemento em uso de um vetor
+ *  com o tamanho da estrutura respectiva, a fim de evitar
+ *  manipulacoes fora dos limites do vetor
  *
  *  Erros: Sintatico (esperado um numero apos '+'!)
  *			   Semantico (endereco ultrapassa tamanho do vetor)
