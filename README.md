@@ -1,4 +1,4 @@
-# [MacroAssembler](https://github.com/LSantos06/MacroAssembler)
+# [Assembler&Linker](https://github.com/LSantos06/MacroAssembler)
 ### Trabalho 1 de Software Básico 1/2017
 O trabalho consiste em implementar em C um método de tradução de uma
 linguagem de montagem simples para uma representação de código objeto. O tradutor
