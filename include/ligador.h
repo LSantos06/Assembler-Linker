@@ -10,8 +10,6 @@
 // Definicao do tamanho maximo de uma linha
 #define TLINHA 100
 
-/*
-* Ligador a se implementado
-*/
+// Ligador em si
 void ligador(int num_objetos, int argc, char* argv[]);
 #endif

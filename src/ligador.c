@@ -4,6 +4,12 @@
  *  ligador()
  *
  *  Funcao responsavel pela ligacao de 2 ou 3 arquivos objeto.
+ *
+ *  Erros: Terminal (erro na abertura do arquivo)
+ *         Lynking (simbolo redefinido)
+ *         Lynking (simbolo esta na tabela de uso, mas nao esta na TGD)
+ *
+ *  Warnings: Lynking (simbolo esta na TGD, mas nunca eh usado)
  */
 void ligador(int num_objetos, int argc, char* argv[]){
   //ler os arquivos objetos
@@ -56,7 +62,7 @@ void ligador(int num_objetos, int argc, char* argv[]){
     FILE* fp = fopen(argv[contador_objetos+num_objetos], "r");
     // Se o arquivo nao conseguiu ser aberto, ERROR -5
     if(fp == NULL){
-      printf("Erro na abertura do arquivo!\n");
+      printf("Erro Terminal: Erro na abertura do arquivo!\n");
       exit(-5);
     }
 
@@ -413,7 +419,7 @@ void ligador(int num_objetos, int argc, char* argv[]){
   e = fopen(argv[argc-1], "w");
   // Se o arquivo nao conseguiu ser aberto, ERROR -4
   if(e == NULL){
-    printf("Erro na abertura do arquivo!\n");
+    printf("Erro Terminal: erro na abertura do arquivo!\n");
     exit(-4);
   }
 

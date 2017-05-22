@@ -30,6 +30,11 @@ Operacoes_t tipo_operacao(char* string){
  *
  *  Funcao responsavel pela checagem do numero de argumentos de entrada
  * do programa de traducao
+ *
+ *  Erros: Terminal (operacao nao reconhecida)
+ *         Terminal (numero de argumentos na chamada do programa eh invalido)
+ *         Terminal (arquivo de saida nao contem extensao '.e'!)
+ *         Terminal (arquivo de saida ja possui extensao)
  */
 Operacoes_t validacao_argumentos(int argc, char* argv[]){
 	// Variavel para retorno
@@ -37,7 +42,7 @@ Operacoes_t validacao_argumentos(int argc, char* argv[]){
 
 	//// Se o tipo de operacao eh diferente de -p -o e -l, ERROR -1
 	if(tipo_operacao(argv[1])==ERRO){
-		printf("Erro: operacao nao reconhecida!\n");
+		printf("Erro Terminal: operacao nao reconhecida!\n");
 		exit(-1);
 	}
 
@@ -45,7 +50,7 @@ Operacoes_t validacao_argumentos(int argc, char* argv[]){
 	if(tipo_operacao(argv[1])==LIGACAO){
 		//// Se o numero de argumentos eh invalido para ERROR -2
 		if(argc>6 || argc<5){
-			printf("Erro: numero de argumentos na chamada do programa eh invalido!\nObteve-se %d argumentos.\n", argc-1);
+			printf("Erro Terminal: numero de argumentos na chamada do programa eh invalido!\nObteve-se %d argumentos.\n", argc-1);
 			exit(-2);
 		}
 
@@ -55,7 +60,7 @@ Operacoes_t validacao_argumentos(int argc, char* argv[]){
 
 		// Se o arquivo de saida nao contem a extensao valida, ERROR -3
 		if((strstr(argv[argc-1], validade_saida_e))==NULL){
-			printf("Erro: Arquivo de saida nao contem extensao '.e'!\n");
+			printf("Erro Terminal: Arquivo de saida nao contem extensao '.e'!\n");
 			exit(-3);
 		}
 	}
@@ -64,7 +69,7 @@ Operacoes_t validacao_argumentos(int argc, char* argv[]){
 	else{
 		//// Se o numero de argumentos eh invalido para -p e -o, ERROR -2
 		if(argc!=4){
-			printf("Erro: numero de argumentos na chamada do programa eh invalido!\nObteve-se %d argumentos.\n", argc-1);
+			printf("Erro Terminal: numero de argumentos na chamada do programa eh invalido!\nObteve-se %d argumentos.\n", argc-1);
 			exit(-2);
 		}
 
@@ -75,7 +80,7 @@ Operacoes_t validacao_argumentos(int argc, char* argv[]){
 		// Funcao strstr() checa se subselecao esta dentro de uma string de interesse
 		if((strstr(argv[argc-1], "/")==NULL)){
 				if((strstr(argv[argc-1], validade_saida))!=NULL){
-					printf("Erro: Arquivo de saida ja possui extensao!\n");
+					printf("Erro Terminal: Arquivo de saida ja possui extensao!\n");
 					exit(-2);
 				} //if validade_saida
 			} //if /
@@ -86,6 +91,58 @@ Operacoes_t validacao_argumentos(int argc, char* argv[]){
 	return operacao;
 }
 
+/*
+ *  string_alta()
+ *
+ *  Funcao que passa uma string para caixa alta
+ */
+void string_alta(char *s){
+	for(; *s; s++){
+		if(('a' <= *s) && (*s <= 'z'))
+			*s = 'A' + (*s - 'a');
+		}
+}
+
+/*
+ *  string_baixa()
+ *
+ *  Funcao que passa uma string para caixa baixa
+ */
+void string_baixa(char *s){
+	for(; *s; s++)
+		if(('A' <= *s) && (*s <= 'Z'))
+			*s = 'a' + (*s - 'A');
+}
+
+/*
+ *  remove_espacos()
+ *
+ *  Remove os espacos dentro do token
+ */
+char* remove_espacos(char *in){
+	char *out = in;
+
+	int i = 0;
+	while(i < strlen(in)){
+		if((in[i] >= 48 && in[i] <= 122) || in[i]=='+'){
+			out[i] = in[i];
+		}
+		else{
+			out[i] = '\0';
+			i++;
+		}
+		//printf("%d char %c ascii %d\n", i, in[i], in[i]);
+		//printf("%d char %c ascii %d\n", i, out[i], out[i]);
+		i++;
+	}
+	return out;
+}
+
+/*
+ *  eh_digito()
+ *
+ *  Funcao que verifica se um char eh digito ou decimal a partir de uma base
+ */
 int eh_digito(char c, char base){
 	switch(base){
 		case 'd':
@@ -114,6 +171,11 @@ int eh_digito(char c, char base){
 
 }
 
+/*
+ *  eh_numero()
+ *
+ *  Funcao que verifica se um numero eh decimal ou hexadecimal a partir de uma base
+ */
 int eh_numero(char *numero, char base){
 	int i = 0;
 	switch(base){
@@ -150,33 +212,10 @@ int eh_numero(char *numero, char base){
 }
 
 /*
- *  string_alta()
+ *	pega_antes_mais()
  *
- *  Funcao que passa uma string para caixa alta
+ *  Pega label ate '+'
  */
-void string_alta(char *s){
-	for(; *s; s++){
-		if(('a' <= *s) && (*s <= 'z'))
-			*s = 'A' + (*s - 'a');
-		}
-}
-
-/*
- *  string_baixa()
- *
- *  Funcao que passa uma string para caixa baixa
- */
-void string_baixa(char *s){
-	for(; *s; s++)
-		if(('A' <= *s) && (*s <= 'Z'))
-			*s = 'a' + (*s - 'A');
-}
-
-/*
-*	pega_antes_mais()
-*
-* Pega label ate '+'
-*/
 char* pega_antes_mais(char *token){
 	int i = 0;
 	char *resultado = token;
@@ -192,30 +231,14 @@ char* pega_antes_mais(char *token){
 }
 
 /*
+ *	pega_elemento_vetor()
  *
- * remove_espacos()
+ *  TODO
  *
- * Remove os espacos dentro do token
+ *  Erros: Sintatico (esperado um numero apos '+'!)
+ *			   Semantico (endereco ultrapassa tamanho do vetor)
+ *         Sintatico (label invalido)
  */
-char* remove_espacos(char *in){
-	char *out = in;
-
-	int i = 0;
-	while(i < strlen(in)){
-		if((in[i] >= 48 && in[i] <= 122) || in[i]=='+'){
-			out[i] = in[i];
-		}
-		else{
-			out[i] = '\0';
-			i++;
-		}
-		//printf("%d char %c ascii %d\n", i, in[i], in[i]);
-		//printf("%d char %c ascii %d\n", i, out[i], out[i]);
-		i++;
-	}
-	return out;
-}
-
 int pega_elemento_vetor(char *token, int linha, int contador_posicao){
 	int depois_mais_num1 = 0;
 	char *antes_mais, *depois_mais;
@@ -232,7 +255,7 @@ int pega_elemento_vetor(char *token, int linha, int contador_posicao){
 			depois_mais++;
 			//Se n for numero, erro
 			if(!eh_numero(depois_mais, 'd')){
-				printf("\nErro Sintatico na linha %d: Esperado um numero apos '+'!\n"
+				printf("\nErro Sintatico (linha %d): Esperado um numero apos '+'!\n"
 				, linha);
 				erro = 1;
 			}
@@ -246,7 +269,7 @@ int pega_elemento_vetor(char *token, int linha, int contador_posicao){
 					//printf("\n%s %d %d\n", antes_mais, depois_mais_num1, atoi(pega_valor(lista_tamanhos_vetores, antes_mais))-1);
 					if(depois_mais_num1 > (atoi(pega_valor(lista_tamanhos_vetores, antes_mais))-1)){
 						erro = 1;
-						printf("\nErro Semantico na linha %d: Endereco ultrapassa tamanho do vetor\n"
+						printf("\nErro Semantico (linha %d): Endereco ultrapassa tamanho do vetor\n"
 						, linha);
 						return -1;
 					}
@@ -258,7 +281,7 @@ int pega_elemento_vetor(char *token, int linha, int contador_posicao){
 				}
 				//Se n for externo, verifica se n eh dado valido
 				else if(eh_dado(antes_mais)!=1){
-					printf("\nErro Sintatico na linha %d: Label invalido!\n"
+					printf("\nErro Sintatico (linha %d): Label invalido!\n"
 					, linha);
 					erro = 1;
 				}
@@ -272,6 +295,11 @@ int pega_elemento_vetor(char *token, int linha, int contador_posicao){
 		return depois_mais_num1;
 }
 
+/*
+ *	imprime_tabelas_arquivo()
+ *
+ *  Escrita das estruturas de dados no arquivo objeto
+ */
 void imprime_tabelas_arquivo(int begin_end, FILE* obj, char *obj_provisorio_nome, lista_t *mapa){
 	char ch;			//Para ler bit a bit do arquivo
 
