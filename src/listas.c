@@ -1,11 +1,17 @@
 #include "listas.h"
 
+// Listas globais
 lista_t *mapa_bits;
 lista_t *lista_zeros;
 lista_t *lista_ctes;
 lista_t *mapa_provisorio;
 lista_t *lista_tamanhos_vetores;
 
+/*
+ *  instancia_listas_globais()
+ *
+ *  Inicializacao e instanciamento das listas globais
+ */
 void instancia_listas_globais(){
 	//Inicia mapa de bits pra mandar enderecos de relocacao
 	//Mapa bits vai conter dados invertidos, pra passar pro mapa provisorio dps
@@ -27,12 +33,20 @@ void instancia_listas_globais(){
 	inicializa_lista(lista_tamanhos_vetores);
 }
 
-// Inicializa lista
+/*
+ *  inicializa_lista()
+ *
+ *  Inicializacao de uma lista
+ */
 void inicializa_lista(lista_t *lista){
 	lista->proximo = NULL;
 }
 
-// Lista vazia
+/*
+ *  vazia_lista()
+ *
+ *  Verifica se a lista esta vazia
+ */
 int vazia_lista(lista_t *lista){
 	if(lista->proximo == NULL)
 		return 1;
@@ -40,7 +54,11 @@ int vazia_lista(lista_t *lista){
 		return 0;
 }
 
-// Insere no fim da lista
+/*
+ *  insere_elemento()
+ *
+ *  Insercao de um elemento na lista
+ */
 void insere_elemento(lista_t *lista, char *id, char *valor){
   lista_t *novo;
   novo = (lista_t *) malloc (sizeof (lista_t));
@@ -62,7 +80,11 @@ void insere_elemento(lista_t *lista, char *id, char *valor){
 	lista->proximo = novo;
 }
 
-// Insere uma lista em outra
+/*
+ *  insere_lista()
+ *
+ *  Insercao de uma lista em uma lista ja existente
+ */
 lista_t * insere_lista(lista_t *lista, lista_t *lista2){
 	if(vazia_lista(lista)){
 		return lista2;
@@ -78,7 +100,11 @@ lista_t * insere_lista(lista_t *lista, lista_t *lista2){
 	}
 }
 
-// Busca um id na lista e retorna elemento
+/*
+ *  busca_elemento()
+ *
+ *  Busca um ID em uma lista e retorna o elemento associado a este ID
+ */
 lista_t * busca_elemento(lista_t *lista, char *id_buscado){
   lista_t *aux = lista;
 
@@ -100,13 +126,11 @@ lista_t * busca_elemento(lista_t *lista, char *id_buscado){
 	return NULL;
 }
 
-char *pega_valor(lista_t *lista, char *id_buscado){
-	lista_t *aux = busca_elemento(lista, id_buscado);
-
-	return aux->valor;
-}
-
-// Mostra a lista
+/*
+ *  exibe_lista()
+ *
+ *  Exibicao de todos os elementos de uma lista
+ */
 void exibe_lista(lista_t *lista){
   printf("\n");
 	if(vazia_lista(lista)){
@@ -125,7 +149,11 @@ void exibe_lista(lista_t *lista){
 	printf("\n\n");
 }
 
-// Libera a memoria alocada pela lista
+/*
+ *  libera_lista()
+ *
+ *  Libera a memoria alocada para uma lista
+ */
 void libera_lista(lista_t *lista){
 	if(!vazia_lista(lista)){
 		lista_t *proximoNo, *noAtual;
@@ -137,4 +165,15 @@ void libera_lista(lista_t *lista){
 			noAtual = proximoNo;
 		}
 	}
+}
+
+/*
+ *  pega_valor()
+ *
+ *  Retorna o VALOR associado a um ID da lista
+ */
+char *pega_valor(lista_t *lista, char *id_buscado){
+	lista_t *aux = busca_elemento(lista, id_buscado);
+
+	return aux->valor;
 }

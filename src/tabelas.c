@@ -23,6 +23,11 @@ addrTab* tabela_simbolos;
 addrTab* tabela_definicoes;
 addrTab* tabela_uso;
 
+/*
+ *  imprime_instrucoes_diretivas()
+ *
+ *  Exibe as tabelas de instrucoes e diretivas
+ */
 void imprime_instrucoes_diretivas(){
 	int i = 0;
 
@@ -36,7 +41,12 @@ void imprime_instrucoes_diretivas(){
 		printf("Nome: <%s>; Ops: <%d>; Tamanho: <%d>\n", tabela_diretivas[i].nome, tabela_diretivas[i].ops, tabela_diretivas[i].tamanho);
 	}
 }
-//Retorna numero de operandos da instrucao de interesse
+
+/*
+ *  tamanho_instrucao()
+ *
+ *  Retorna numero de operandos da instrucao de interesse
+ */
 int tamanho_instrucao(char *operacao){
 	int i, achou = 0, retorno = 0;
 
@@ -56,6 +66,11 @@ int tamanho_instrucao(char *operacao){
 	return retorno;
 }
 
+/*
+ *  opcode()
+ *
+ *  Retorna o opcode de uma instrucao
+ */
 int opcode(char *simbolo){
 	int i, achou = 0, retorno = 0;
 
@@ -75,7 +90,11 @@ int opcode(char *simbolo){
 	return retorno;
 }
 
-
+/*
+ *  tamanho_diretiva()
+ *
+ *  Retorna o tamanho de uma diretiva
+ */
 int tamanho_diretiva(char *diretiva){
 	int i, achou = 0, retorno = 0;
 	int op_space = 0;
@@ -98,8 +117,23 @@ int tamanho_diretiva(char *diretiva){
 	return retorno;
 }
 
+/*
+ *  pega_primeiro_simbolo()
+ *
+ *  Pega o primeiro simbolo de uma tabela
+ */
+char *pega_primeiro_simbolo(addrTab *tabela){
+	addrTab *aux = tabela->prox;
 
-//Cria a TS, TD e Tab de Uso
+	return aux->simbolo;
+}
+
+
+/*
+ *  inicializa_tabelas()
+ *
+ *  Cria a Tabela de Simbolos, Tabela de Definicoes e Tabela de Uso
+ */
 void inicializa_tabelas(){
 	tabela_simbolos = (addrTab *) malloc(sizeof(addrTab));
 	tabela_simbolos->prox = NULL;
@@ -111,67 +145,11 @@ void inicializa_tabelas(){
 	tabela_uso->prox = NULL;
 }
 
-/*addrTab* cria_tabela(){
-	addrTab *aux = (addrTab*) malloc(sizeof(addrTab));
-
-	aux->prox = NULL;
-	return aux;
-}*/
-
-addrTab* busca_simbolo(addrTab* tabela, char* nome){
-	addrTab* aux = tabela;
-
-	while(aux!=NULL){
-		if(!strcmp(nome, aux->simbolo)){
-			return aux;
-		}
-		aux = aux->prox;
-	}
-
-	return NULL;
-}
-
-//Funcao que copia as posicoes dos simbolos para
-//a tabela definicoes ao final da passagem 1
-void copia_para_definicoes(){
-	addrTab* aux = tabela_definicoes;
-	addrTab* simbolo;
-
-	while(aux!=NULL){
-		simbolo = busca_simbolo(tabela_simbolos, aux->simbolo);
-		if(simbolo != NULL){
-			aux->posicao_memoria = simbolo->posicao_memoria;
-			aux->data = simbolo->data;
-		}
-		aux = aux->prox;
-	}
-}
-
-char *pega_primeiro_simbolo(addrTab *tabela){
-	addrTab *aux = tabela->prox;
-
-	return aux->simbolo;
-}
-int pertence_tabela(addrTab* tabela, char* nome){
-	addrTab *aux = busca_simbolo(tabela, nome);
-
-	if(aux == NULL){
-		return 0;
-	}
-
-	return 1;
-}
-
-int busca_posicao_memoria(addrTab* tabela, char* nome){
-	addrTab *aux = busca_simbolo(tabela, nome);
-
-	if(aux == NULL){
-		return -1;
-	}
-
-	return aux->posicao_memoria;
-}
-
+/*
+ *  esta_vazia()
+ *
+ *  Verifica se a tabela esta vazia
+ */
 int esta_vazia(addrTab* tabela){
 	if(tabela == NULL){
 		return 0;
@@ -183,26 +161,26 @@ int esta_vazia(addrTab* tabela){
 	return 0;
 }
 
-int eh_dado(char*simbolo){
-	addrTab *aux = busca_simbolo(tabela_simbolos, simbolo);
-
-	if(aux == NULL){
-		return -1;
-	}
-
-	return aux->data;
-}
-
-int eh_externo(char *simbolo){
-	addrTab *aux = busca_simbolo(tabela_simbolos, simbolo);
+/*
+ *  pertence_tabela()
+ *
+ *  Verifica se o nome pertence a tabela
+ */
+int pertence_tabela(addrTab* tabela, char* nome){
+	addrTab *aux = busca_simbolo(tabela, nome);
 
 	if(aux == NULL){
 		return 0;
 	}
 
-	return aux->externo;
+	return 1;
 }
 
+/*
+ *  insere_tabela()
+ *
+ *  Insere um simbolo em uma tabela
+ */
 void insere_tabela(addrTab *tabela, char *nome, int posicao, int externo, int data){
 	//Tabela de uso pode ter mais de um label repetido
 	if(pertence_tabela(tabela, nome) && tabela !=tabela_uso){
@@ -222,7 +200,11 @@ void insere_tabela(addrTab *tabela, char *nome, int posicao, int externo, int da
 	return;
 }
 
-
+/*
+ *  imprime_tabela()
+ *
+ *  Exibe uma tabela
+ */
 void imprime_tabela(addrTab *tabela){
 	if(tabela==NULL){
 		return;
@@ -245,3 +227,93 @@ void imprime_tabela(addrTab *tabela){
 	printf("\n\n");
 	return;
 }
+
+/*
+ *  copia_para_definicoes()
+ *
+ *  Funcao que copia as posicoes dos simbolos para
+ * a tabela definicoes ao final da passagem 1
+ */
+void copia_para_definicoes(){
+	addrTab* aux = tabela_definicoes;
+	addrTab* simbolo;
+
+	while(aux!=NULL){
+		simbolo = busca_simbolo(tabela_simbolos, aux->simbolo);
+		if(simbolo != NULL){
+			aux->posicao_memoria = simbolo->posicao_memoria;
+			aux->data = simbolo->data;
+		}
+		aux = aux->prox;
+	}
+}
+
+/*
+ *  busca_simbolo()
+ *
+ *  Retorna um simbolo a partir de um nome na tabela
+ */
+addrTab* busca_simbolo(addrTab* tabela, char* nome){
+	addrTab* aux = tabela;
+
+	while(aux!=NULL){
+		if(!strcmp(nome, aux->simbolo)){
+			return aux;
+		}
+		aux = aux->prox;
+	}
+
+	return NULL;
+}
+
+/*
+ *  busca_posicao_memoria()
+ *
+ *  Retorna a posicao de memoria de um nome na tabela
+ */
+int busca_posicao_memoria(addrTab* tabela, char* nome){
+	addrTab *aux = busca_simbolo(tabela, nome);
+
+	if(aux == NULL){
+		return -1;
+	}
+
+	return aux->posicao_memoria;
+}
+
+/*
+ *  eh_dado()
+ *
+ *  TODO
+ */
+int eh_dado(char*simbolo){
+	addrTab *aux = busca_simbolo(tabela_simbolos, simbolo);
+
+	if(aux == NULL){
+		return -1;
+	}
+
+	return aux->data;
+}
+
+/*
+ *  eh_externo()
+ *
+ *  TODO
+ */
+int eh_externo(char *simbolo){
+	addrTab *aux = busca_simbolo(tabela_simbolos, simbolo);
+
+	if(aux == NULL){
+		return 0;
+	}
+
+	return aux->externo;
+}
+
+// TODO
+/*addrTab* cria_tabela(){
+	addrTab *aux = (addrTab*) malloc(sizeof(addrTab));
+	aux->prox = NULL;
+	return aux;
+}*/
