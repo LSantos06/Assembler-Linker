@@ -1,0 +1,27 @@
+;section text faltante
+COPY ZERO,OLDER
+COPY ONE,OLD
+INPUT L#IMIT ;token invalido TODO
+OUTPUT OLD
+FRONT: GO: LOAD OLDER ;2 rotulos na msm linha
+ADD OLD
+STORE NEW
+SUB LIMIT
+JMPP FINAL
+OUTPUT NEW
+COPY OLD,OLDER
+COPY NEW,OLD
+SRL NEW ;instrucao invalida
+JMP FRONT
+FINAL: OUTPUT LIMIT
+SECTION BSS ;secao invalida
+SECTION DATA
+JMP FRONT ;instrucoes na sessao errada
+ZERO: CONST 0
+ONE: CONST 1
+OLDER: SPACE
+OLD: SPACE
+NEW: SPACE
+NEW: CONST 1 ;declaracao repetida
+LIMIT: SPACE
+; stop faltante TODO
