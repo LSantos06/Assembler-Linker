@@ -2,7 +2,7 @@
 SECTION TEXT
 COPY ZERO,OLDER
 COPY ONE,OLD
-INPUT L#IMIT ;token invalido (TODO: MOSTRA OPERACAO INVALIDA)
+;INPUT 2LIMIT ;token invalido (TODO: MOSTRA OPERACAO INVALIDA)
 OUTPUT OLD
 ;FRONT: GO: LOAD OLDER ;2 rotulos na msm linha
 ADD OLD
@@ -15,6 +15,7 @@ COPY NEW,OLD
 ;SRL NEW ;instrucao invalida
 FINAL: OUTPUT LIMIT
 ; stop faltante (tirar outros erros para ver)
+STOP
 ;SECTION BSS ;secao invalida
 SECTION DATA
 ;JMP FRONT ;instrucoes na sessao errada
@@ -25,4 +26,4 @@ OLD: SPACE
 NEW: SPACE
 ;NEW: CONST 1 ;declaracao repetida
 LIMIT: SPACE
-L#IMIT: SPACE
+;2LIMIT: SPACE

@@ -16,7 +16,7 @@ OUTPUT NEW
 COPY OLD,OLDER
 COPY NEW,OLD
 ;JMP ZERO ; pulo para rotulo invalido
-L: SPACE ; diretiva na sessao errada (TODO)
+;L: SPACE ; diretiva na sessao errada (TODO)
 FINAL: OUTPUT LIMIT
 STOP
 SECTION DATA
