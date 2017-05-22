@@ -1,13 +1,13 @@
-# MacroAssembler
+# [Assembler&Linker](https://github.com/LSantos06/MacroAssembler)
 ### Trabalho 1 de Software Básico 1/2017
-O trabalho consiste em implementar em C/C++ um método de tradução de uma
+O trabalho consiste em implementar em C um método de tradução de uma
 linguagem de montagem simples para uma representação de código objeto. O tradutor
 a ser implementado ser ́a um Macro-Assembler da linguagem hipotética vista em sala
 de aula.
 
 ### Integrantes do grupo
 * Davi Rabbouni - 15/0033010
-  - [X] _Versão do gcc_: gcc (Ubuntu 6.2.0-5ubuntu12) 6.2.0 20161005
+  - [X] _Versão do gcc_: gcc version 6.2.0 20161005 (Ubuntu 6.2.0-5ubuntu12) 
   - [X] _Sistema Operacional_: Ubuntu 16.10 (64-bit) "yakkety"
 * Lucas Santos - 14/0151010
   - [X] _Versão do gcc_: gcc version 5.4.0 20160609 (Ubuntu 5.4.0-6ubuntu1~16.04.4) 

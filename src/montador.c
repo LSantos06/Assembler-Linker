@@ -110,7 +110,7 @@ void seleciona_operacao(int argc, char* argv[]){
  *  Erros: Lexico (token '%s' inicia com digito)
  *         (excedeu numero de tokens)
  */
-int scanner(char *linha, int contador_linha, char *delimitador){
+int scanner(char *linha, int contador_linha, char *delimitador, int passagem){
 	if(linha == NULL){
 		return 0;
 	}
@@ -125,16 +125,22 @@ int scanner(char *linha, int contador_linha, char *delimitador){
 		tokens_linha[i] = remove_espacos(strdup(token));
 		//Se token comeca com numero e n vem depois de uma diretiva SPACE ou CONST: ERROR -6
 		if(i>0 && token[0]>='0' && token[0]<='9' && (strcmp(tokens_linha[i-1], "SPACE") && strcmp(tokens_linha[i-1], "CONST")) ){
-			printf("Erro lexico (linha %d): token '%s' inicia com digito\n", contador_linha, token);
+			if(passagem == 1){
+				printf("Erro lexico (linha %d): token '%s' inicia com digito\n", contador_linha, token);
+			}
 			erro = 1;
 		}
 		//Mesma condicao da anterior, mas sem acessar fora dos limites do vetor
 		else if(i==0 && token[0]>='0' && token[0]<='9'){
-			printf("Erro lexico (linha %d): token '%s' inicia com digito\n", contador_linha, token);
+			if(passagem == 1){
+				printf("Erro lexico (linha %d): token '%s' inicia com digito\n", contador_linha, token);
+			}
 			erro = 1;
 		}
 		if(i>8){
-			printf("\nExcedeu numero de tokens! (linha %d)\n", contador_linha);
+			if(passagem == 1){
+				printf("\nExcedeu numero de tokens! (linha %d)\n", contador_linha);
+			}
 			erro = 1;
 			break;
 		}
@@ -576,7 +582,7 @@ int passagem1(FILE *pre_processado){
 	    if(instrucao[0]!='\n' && instrucao[1]!='\0'){
 
 		    //Scanner coloca em tokens_linha um vetor com os tokens da linha
-		    if(!scanner(instrucao, contador_linha, " \t\n")){
+		    if(!scanner(instrucao, contador_linha, " \t\n", 1)){
 					flag_erro = 1;
 				}
 
@@ -686,6 +692,11 @@ int passagem1(FILE *pre_processado){
 		    		pulo = tamanho_diretiva(elemento);
 		    		//Se tiver achado na tabela de diretivas
 			    		if(pulo != -1){
+								//Se tiver dentro do SECTION TEXT (antes do DATA)
+								if(!def_sec_data && def_sec_text){
+									printf("\nErro Semantico (linha %d): Diretiva na Secao errada!\n", contador_linha);
+									flag_erro = 1;
+								}
 									string_alta(tokens_linha[i+1]);
 									//Se for space
 									if(!strcmp(elemento, "SPACE")){
@@ -861,7 +872,7 @@ FILE* passagem2(FILE *arq_intermediario, char* nome_arquivo_obj, int erro_passag
 				def_label = 0;
 
 		    //Scanner coloca em tokens_linha um vetor com os tokens da linha
-		    if(!scanner(instrucao, contador_linha, " ,\t\n")){
+		    if(!scanner(instrucao, contador_linha, " ,\t\n", 2)){
 					flag_erro = 1;
 				}
 

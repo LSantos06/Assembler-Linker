@@ -47,31 +47,31 @@ void testes(){
 
 void teste_scanner(){
 	char teste[] = "Teste com espaco token";
-	scanner(teste, 0, " \n\t");
+	scanner(teste, 0, " \n\t", 1);
 	imprime_tokens();
 
 	strcpy(teste, "1Teste mais um");
-	scanner(teste,1, " \n\t");
+	scanner(teste,1, " \n\t", 1);
 	imprime_tokens();
 
 	strcpy(teste, "1Teste           mais um");
-	scanner(teste,2, " \n\t");
+	scanner(teste,2, " \n\t", 1);
 	imprime_tokens();
 
 	strcpy(teste, "1Teste\tmais um");
-	scanner(teste,3, " \n\t");
+	scanner(teste,3, " \n\t", 1);
 	imprime_tokens();
 
 	strcpy(teste, "Teste mais um\n");
-	scanner(teste,4, " \n\t");
+	scanner(teste,4, " \n\t", 1);
 	imprime_tokens();
 
 	strcpy(teste, "Teste\n");
-	scanner(teste,5, " \n\t");
+	scanner(teste,5, " \n\t", 1);
 	imprime_tokens();
 
 	strcpy(teste, "A,B\n");
-	scanner(teste,5, " \n\t,");
+	scanner(teste,5, " \n\t,", 1);
 	imprime_tokens();
 }
 

@@ -17,7 +17,7 @@
 void seleciona_operacao(int argc, char* argv[]);
 
 // Funcao que separara os elementos da linha
-int scanner(char *linha, int contador_linha, char *delimitador);
+int scanner(char *linha, int contador_linha, char *delimitador, int passagem);
 
 // Realiza o pre processamento sobre um arquivo .asm (-p), gerando um arquivo .pre
 FILE* pre_processamento(FILE *entrada, char* nome_arquivo_pre);
