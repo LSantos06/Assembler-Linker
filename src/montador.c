@@ -167,7 +167,6 @@ int scanner(char *linha, int contador_linha, char *delimitador, int passagem){
  *   - IF, 1 operando, inclui a linha seguinte somente se o operando == 1.
  *
  *  Erros: Terminal (erro na abertura do arquivo!)
- *         Sintatico (operando do IF possui tipo inválido!)
  *         Sintatico (operando do EQU possui tipo invalido!)
  *         Semantico (label '%s' ja definida!)
  *
@@ -297,8 +296,8 @@ FILE* pre_processamento(FILE *entrada, char *nome_arquivo_pre){
 	            printf("IF: escreve prox\n");
 							escreve = 1;
 	          }
-	          // IF 0, proxima linha nao eh escrita
-	          else if(!strcmp(resultado_busca->valor, "0")){
+	          // IF != 1, proxima linha nao eh escrita
+	          else{
 							printf("IF: nao escreve prox\n");
 							escreve = 0;
 	          }
@@ -309,14 +308,9 @@ FILE* pre_processamento(FILE *entrada, char *nome_arquivo_pre){
 						escreve = 1;
 					}
 					// Operando eh 0
-					else if(!strcmp(token,"0")){
+					else{
 						printf("IF: nao escreve prox\n");
 						escreve = 0;
-					}
-					// Se o operando do IF nao for EQU, nem 1, nem 0
-					else{
-							printf("Erro Sintático (Linha %d): operando do IF possui tipo inválido!\n", contador_linha);
-							flag_erro = 1;
 					}
         } // 2 token
       } // if
