@@ -31,6 +31,9 @@ void ligador(int num_objetos, int argc, char* argv[]){
   // Sinaliza em qual parte do .o a info esta
   int flag = 0;
 
+  // Sinaliza um erro e impede a ligacao
+  int flag_erro = 0;
+
   // Vetores para armazenar as tabelas de cada arquivo
   int contador = 0;
   lista_t *tabela_uso[num_objetos];
@@ -59,7 +62,7 @@ void ligador(int num_objetos, int argc, char* argv[]){
   while(contador_objetos!=num_objetos){
 
     // Abertura do arquivo para leitura
-    FILE* fp = fopen(argv[contador_objetos+num_objetos], "r");
+    FILE* fp = fopen(argv[2+contador_objetos], "r");
     // Se o arquivo nao conseguiu ser aberto, ERROR -5
     if(fp == NULL){
       printf("Erro Terminal: Erro na abertura do arquivo!\n");
@@ -173,6 +176,12 @@ void ligador(int num_objetos, int argc, char* argv[]){
     else{
       // Fator de correcao eh igual ao tamanho do objeto anterior
       fator_correcao[contador_objetos] = tamanho_objeto[contador_objetos-1];
+
+      // Se for o terceiro arquivo objeto o fator de correcao eh a soma dos dois anteriores
+      if(contador_objetos == 2){
+        fator_correcao[contador_objetos] += tamanho_objeto[contador_objetos-2];
+      }
+
     }
 
     // Fecha o arquivo objeto atual
@@ -213,7 +222,7 @@ void ligador(int num_objetos, int argc, char* argv[]){
   // Mesmo processo para 3 objetos
   if(num_objetos == 3){ //TODO: TESTAR
     codigo_incial = strcat(codigo_incial, codigo[2]);
-    int tamanho_codigo = tamanho_objeto[0] + tamanho_objeto[1] + tamanho_objeto[2];
+    tamanho_codigo = tamanho_objeto[0] + tamanho_objeto[1] + tamanho_objeto[2];
   }
 
   printf("\n:::::::::::::CODIGO INICIAL\n%s\n", codigo_incial);
@@ -268,6 +277,7 @@ void ligador(int num_objetos, int argc, char* argv[]){
       busca_redefinicao = busca_elemento(TGD, aux->id);
       if(busca_redefinicao != NULL){
         printf("Lynking Error: símbolo %s redefinido\n", busca_redefinicao->id);
+        flag_erro = 1;
       }
       else{
         // Insere o elemento corrigido na TGD
@@ -354,6 +364,7 @@ void ligador(int num_objetos, int argc, char* argv[]){
 
       if(simbolo_buscado == NULL){
         printf("Lynking Error: símbolo %s está na tabela de uso, mas não está na tabela geral de definições\n", aux_referencia->id);
+        flag_erro = 1;
       } // simbolo nao esta na TGD
 
       else{
@@ -433,7 +444,14 @@ void ligador(int num_objetos, int argc, char* argv[]){
   // Fecha o arquivo .e
   fclose(e);
 
-  printf("\n##############Arquivo ligado %s gerado!\n", argv[argc-1]);
+  // Apaga arquivo de saida se encontra erro
+  if(flag_erro == 1){
+    printf("\n##############Erros, arquivo ligado %s nao foi gerado!\n", argv[argc-1]);
+    remove(argv[argc-1]);
+  }
+  else{
+    printf("\n##############Arquivo ligado %s gerado!\n", argv[argc-1]);
+  }
 
   return;
 }
