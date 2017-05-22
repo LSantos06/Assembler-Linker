@@ -284,7 +284,8 @@ int busca_posicao_memoria(addrTab* tabela, char* nome){
 /*
  *  eh_dado()
  *
- *  TODO
+ *  Funcao que retorna se um simbolo na TS eh dado
+ *  ou nao
  */
 int eh_dado(char*simbolo){
 	addrTab *aux = busca_simbolo(tabela_simbolos, simbolo);
@@ -299,7 +300,8 @@ int eh_dado(char*simbolo){
 /*
  *  eh_externo()
  *
- *  TODO
+ *  Funcao que retorna se um simbolo na TS eh
+ *  externo ou nao
  */
 int eh_externo(char *simbolo){
 	addrTab *aux = busca_simbolo(tabela_simbolos, simbolo);
@@ -311,7 +313,7 @@ int eh_externo(char *simbolo){
 	return aux->externo;
 }
 
-// TODO
+// Funcao que cria uma estrutura tabela (nao utilizada)
 /*addrTab* cria_tabela(){
 	addrTab *aux = (addrTab*) malloc(sizeof(addrTab));
 	aux->prox = NULL;
