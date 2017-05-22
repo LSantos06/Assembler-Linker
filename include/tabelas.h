@@ -43,7 +43,7 @@ extern addrTab* tabela_uso;
 /*********** Funcoes de manipulacao das tabelas ***********/
 void imprime_instrucoes_diretivas();
 
-// TODO Funcoes de encapsulamento de instrucoes e diretivas
+// Funcoes de encapsulamento de instrucoes e diretivas
 int tamanho_instrucao(char *operacao);
 int opcode(char *simbolo);
 int tamanho_diretiva(char *diretiva);
@@ -57,7 +57,7 @@ void insere_tabela(addrTab *tabela, char *nome, int posicao, int externo, int da
 void imprime_tabela(addrTab *tabela);
 void copia_para_definicoes();
 
-// TODO Funcoes de encapsulamento das tabelas
+// Funcoes de encapsulamento das tabelas
 addrTab* busca_simbolo(addrTab* tabela, char* nome);
 int busca_posicao_memoria(addrTab* tabela, char* nome);
 int eh_dado(char*simbolo);

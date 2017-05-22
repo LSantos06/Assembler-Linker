@@ -48,7 +48,7 @@ int eh_numero(char *numero, char base);
 // Pega string ate operando +
 char* pega_antes_mais(char *token);
 
-// TODO
+// Evita manipulacoes fora dos limites do vetor
 int pega_elemento_vetor(char *token, int linha, int contador_posicao);
 
 // Escreve estruturas pro arquivo objeto

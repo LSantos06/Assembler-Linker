@@ -529,9 +529,11 @@ FILE* pre_processamento(FILE *entrada, char *nome_arquivo_pre){
  *         Lexico (rótulo Inválido! ':' no meio do token)
  *         Semantico (simbolo redefinido)
  *         Sintatico (Múltiplos labels na mesma linha)
+ *         Semantico (instrucao na secao de dados)
  *				 Sintatico (SECTION Invalido)
- *         Sintatico (Operando para diretiva SPACE invalido (numero menor ou igual a 0)!)
- *         Sintatico (Diretiva CONST espera 1 argumento!)
+ *         Sintatico (operando para diretiva SPACE invalido (numero menor ou igual a 0)!)
+ *         Sintatico (diretiva CONST espera 1 argumento!)
+ *         Sintatico (operacao nao identificada)
  *         Semantico ('SECTION TEXT' faltando no programa)
  */
 int passagem1(FILE *pre_processado){
@@ -734,7 +736,7 @@ int passagem1(FILE *pre_processado){
 			    		else {
 								//Pulo pode ser -2, de um operando de diretiva invalido
 								if(pulo == -1){
-			    			printf("\nErro Sintatico na linha %d! Operacao nao identificada\n", contador_linha);
+			    			printf("\nErro Sintatico (linha %d): Operacao nao identificada (nao eh instrucao nem diretiva)\n", contador_linha);
 								flag_erro = 1;
 							}
 			    			break;
@@ -1021,9 +1023,8 @@ void imprime_tokens(){
  *  Funcao de checagem de tipos das instrucoes
  *
  *  Erros: Semantico (pulo para rotulo invalido!)
+ *         Sintatico (argumento nao declarado!)
  *         Sintatico (argumento invalido!)
- *         Sintatico (argumento 1 de 'COPY' invalido!)
- *         Sintatico (argumento 2 de 'COPY' invalido!)
  *         Sintatico ('STOP' nao recebe argumentos!)
  */
 int checa_tipo_instrucao(FILE* obj, int i, int contador_linha, int *contador_posicao){
@@ -1080,7 +1081,7 @@ int checa_tipo_instrucao(FILE* obj, int i, int contador_linha, int *contador_pos
 	//Se for copy
 	else if(!strcmp(tokens_linha[i], "COPY")){
 				//TRATAMENTO TOKEN 1
-				depois_mais_num1 = pega_elemento_vetor(tokens_linha[i+1], contador_linha, *contador_posicao-1);
+				depois_mais_num1 = (tokens_linha[i+1], contador_linha, *contador_posicao-1);
 					//Se for 0, n tem +
 					if(!depois_mais_num1){
 							flag_dado = eh_dado(tokens_linha[i+1]);
