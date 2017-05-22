@@ -1039,6 +1039,7 @@ int checa_tipo_instrucao(FILE* obj, int i, int contador_linha, int *contador_pos
 	int depois_mais_num1, depois_mais_num2;
 	int indice_retorno, erro = 0;
 	int externo1 = 0, externo2 = 0;
+	int flag_dado;
 
 	//Coloca em Upper Case para fazer comparacao
 	string_alta(tokens_linha[i+1]);
@@ -1060,7 +1061,7 @@ int checa_tipo_instrucao(FILE* obj, int i, int contador_linha, int *contador_pos
 		}
 		//Se n tiver achado na tabela
 		else if(eh_dado(tokens_linha[i+1])==-1){
-			printf("\nErro Sintatico (linha %d): Argumento invalido!\n", contador_linha);
+			printf("\nErro Sintatico (linha %d): Argumento nao declarado!\n", contador_linha);
 			erro = 1;
 		}
 		//Se argumento for valido, imprime
@@ -1082,6 +1083,7 @@ int checa_tipo_instrucao(FILE* obj, int i, int contador_linha, int *contador_pos
 				depois_mais_num1 = pega_elemento_vetor(tokens_linha[i+1], contador_linha, *contador_posicao-1);
 					//Se for 0, n tem +
 					if(!depois_mais_num1){
+							flag_dado = eh_dado(tokens_linha[i+1]);
 							antes_mais1 = tokens_linha[i+1];
 							//Se for um simbolo externo, coloca na tabela de uso
 							if(eh_externo(tokens_linha[i+1])){
@@ -1090,8 +1092,13 @@ int checa_tipo_instrucao(FILE* obj, int i, int contador_linha, int *contador_pos
 								insere_tabela(tabela_uso, tokens_linha[i+1], *contador_posicao-1, 0, 0);
 							}
 							//Se 1 argumento n for dado
-							else if(eh_dado(tokens_linha[i+1])!=1){
+							else if(flag_dado!=1){
+								if(flag_dado == -1){
+									printf("\nErro Semantico (linha %d): Argumento 1 de 'COPY' nao declarado!\n", contador_linha);
+								}
+								else{
 								printf("\nErro Sintatico (linha %d): Argumento 1 de 'COPY' invalido!\n", contador_linha);
+								}
 								erro = 1;
 							} //else if
 					} // if(!depois_mais_num1)
@@ -1110,6 +1117,7 @@ int checa_tipo_instrucao(FILE* obj, int i, int contador_linha, int *contador_pos
 				depois_mais_num2 = pega_elemento_vetor(tokens_linha[i+2], contador_linha, *contador_posicao);
 					//Se for 0, n tem +
 					if(!depois_mais_num2){
+							flag_dado = eh_dado(tokens_linha[i+2]);
 							antes_mais2 = tokens_linha[i+2];
 							//Se for um simbolo externo, coloca na tabela de uso
 							if(eh_externo(tokens_linha[i+2])){
@@ -1118,8 +1126,13 @@ int checa_tipo_instrucao(FILE* obj, int i, int contador_linha, int *contador_pos
 								insere_tabela(tabela_uso, tokens_linha[i+2], *contador_posicao, 0, 0);
 							}
 							//Se 2 argumento n for dado
-							else if(eh_dado(tokens_linha[i+2])!=1){
+							else if(flag_dado!=1){
+								if(flag_dado == -1){
+									printf("\nErro Semantico (linha %d): Argumento 2 de 'COPY' nao declarado!\n", contador_linha);
+								}
+								else{
 								printf("\nErro Sintatico (linha %d): Argumento 2 de 'COPY' invalido!\n", contador_linha);
+								}
 								erro = 1;
 							} //else if
 					} // if(!depois_mais_num1)
@@ -1170,6 +1183,7 @@ int checa_tipo_instrucao(FILE* obj, int i, int contador_linha, int *contador_pos
 			depois_mais_num1 = pega_elemento_vetor(tokens_linha[i+1], contador_linha, *contador_posicao);
 			//Se n possuir +, considera todo o token como label
 			if(depois_mais_num1 == 0){
+					flag_dado = eh_dado(tokens_linha[i+1]);
 					//Pega o label td para impressao
 					antes_mais1 = tokens_linha[i+1];
 					//Se for um simbolo externo, coloca na tabela de uso
@@ -1178,8 +1192,13 @@ int checa_tipo_instrucao(FILE* obj, int i, int contador_linha, int *contador_pos
 						//insere(tabela, instrucao, posicao, externo, eh_dado?)
 						insere_tabela(tabela_uso, tokens_linha[i+1], *contador_posicao, 0, 0);
 					}
-					else if(eh_dado(tokens_linha[i+1])!=1){
-						printf("\nErro Sintatico (linha %d): Argumento invalido!\n", contador_linha);
+					else if(flag_dado != 1){
+						if(flag_dado == -1){
+							printf("\nErro Semantico (linha %d): Argumento nao declarado!\n", contador_linha);
+						}
+						else{
+							printf("\nErro Sintatico (linha %d): Argumento invalido!\n", contador_linha);
+						}
 						erro = 1;
 					} //if
 			}

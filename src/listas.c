@@ -108,6 +108,7 @@ lista_t * insere_lista(lista_t *lista, lista_t *lista2){
 lista_t * busca_elemento(lista_t *lista, char *id_buscado){
   lista_t *aux = lista;
 
+	string_alta(id_buscado);
 	// Tira \n
 	if(id_buscado[strlen(id_buscado)-1] < 48
 	|| id_buscado[strlen(id_buscado)-1] > 122){

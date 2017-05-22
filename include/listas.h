@@ -1,10 +1,6 @@
 #ifndef LISTAS_H
 #define LISTAS_H
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
 // Tamanho maximo dos atributos de uma lista
 #define TAMAT 10
 
@@ -14,6 +10,11 @@ typedef struct lista{
   char valor[TAMAT];
   struct lista *proximo;
 } lista_t;
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "arquivo.h"
 
 // Mapa de bits com enderecos de relocacao p/ ligador
 extern lista_t *mapa_bits;
